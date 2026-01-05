@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.effect.InnerShadow?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<GridPane hgap="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" vgap="14.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25">
+  <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="282.4866638183594" minWidth="10.0" prefWidth="232.8730010986328" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="339.4738464355469" minWidth="10.0" prefWidth="214.82925415039062" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="175.6392822265625" minWidth="10.0" prefWidth="141.67074584960938" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="175.6392822265625" minWidth="10.0" prefWidth="32.411376953125" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="132.63232421875" minWidth="10.0" prefWidth="96.088623046875" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints maxHeight="69.0821762084961" minHeight="10.0" prefHeight="69.0821762084961" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="44.91141891479492" minHeight="10.0" prefHeight="13.196372985839844" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="76.80362701416016" minHeight="10.0" prefHeight="25.930633544921875" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="73.06936645507812" minHeight="10.0" prefHeight="24.97491455078125" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="75.61366271972656" minHeight="10.0" prefHeight="19.658493041992188" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="75.34150695800781" minHeight="10.0" prefHeight="23.886322021484375" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="90.33512878417969" minHeight="5.734283447265625" prefHeight="15.91143798828125" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="132.847900390625" minHeight="10.0" prefHeight="111.37353515625" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="108.51226806640625" minHeight="10.0" prefHeight="24.557098388671875" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="100.65155029296875" minHeight="10.0" prefHeight="52.942901611328125" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="84.97439575195312" minHeight="9.34844970703125" prefHeight="24.9556884765625" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="25.911376953125" minHeight="0.0" prefHeight="6.8292236328125" vgrow="SOMETIMES" />
+  </rowConstraints>
+   <children>
+      <Label text="Flashcards" GridPane.columnSpan="5" GridPane.halignment="CENTER">
+         <font>
+            <Font name="Arial Black" size="36.0" />
+         </font>
+      </Label>
+      <Label text="Vælg et sæt flashcards:" GridPane.rowIndex="1">
+         <font>
+            <Font name="Arial Hebrew" size="16.0" />
+         </font>
+      </Label>
+      <TableView prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.rowSpan="8">
+        <columns>
+          <TableColumn prefWidth="346.4936361312866" text="Træningssæt" />
+          <TableColumn prefWidth="111.50634765625" text="Antal kort" />
+        </columns>
+      </TableView>
+      <Label text="Detaljer for træningssættet" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+         <font>
+            <Font name="Arial Black" size="13.0" />
+         </font>
+      </Label>
+      <Label text="    Antal kort i træningssættet:" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.rowIndex="3" />
+      <Label text="    Sidst spillet:" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+      <Label text="    Træningsstatus:" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+      <Label GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+      <Label GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
+      <Label GridPane.columnIndex="4" GridPane.halignment="CENTER" GridPane.rowIndex="5" />
+      <ProgressBar prefHeight="15.0" prefWidth="245.0" progress="0.0" GridPane.columnIndex="2" GridPane.columnSpan="3" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+      <Button mnemonicParsing="false" prefWidth="490.0" text="+ Importer Anki flashkortsæt" GridPane.columnSpan="2" GridPane.rowIndex="10" />
+      <Button mnemonicParsing="false" prefWidth="140.0" style="-fx-background-color: #28a745;" text="Start træning" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="BOTTOM">
+         <effect>
+            <InnerShadow height="10.0" radius="4.5" width="10.0" />
+         </effect>
+         <font>
+            <Font name="Arial Black" size="11.0" />
+         </font>
+      </Button>
+      <Button mnemonicParsing="false" prefWidth="140.0" style="-fx-background-color: #007bff;" text="Genoptag træning" textFill="WHITE" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="7" GridPane.valignment="BOTTOM">
+         <effect>
+            <InnerShadow height="10.0" radius="4.5" width="10.0" />
+         </effect>
+         <font>
+            <Font name="Arial Black" size="11.0" />
+         </font>
+      </Button>
+      <Button mnemonicParsing="false" prefWidth="140.0" style="-fx-background-color: #ffc107;" text="Start forfra" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="BOTTOM">
+         <effect>
+            <InnerShadow height="10.0" radius="4.5" width="10.0" />
+         </effect>
+         <font>
+            <Font name="Arial Black" size="11.0" />
+         </font>
+      </Button>
+      <Button mnemonicParsing="false" prefWidth="140.0" style="-fx-background-color: #dc3545;" text="Slet træningssættet" textFill="WHITE" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="8" GridPane.valignment="BOTTOM">
+         <effect>
+            <InnerShadow height="10.0" radius="4.5" width="10.0" />
+         </effect>
+         <font>
+            <Font name="Arial Black" size="11.0" />
+         </font>
+      </Button>
+   </children>
+   <padding>
+      <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
+   </padding>
+</GridPane>
