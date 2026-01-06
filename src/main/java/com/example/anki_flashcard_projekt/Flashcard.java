@@ -19,4 +19,19 @@ public class Flashcard implements Serializable
         this.answer = answer;
         this.imagePath = imagePath;
     }
+
+    public String getQuestion()
+    {
+        return question;
+    }
+
+    public String getAnswer()
+    {
+        return answer;
+    }
+
+    public String getImagePath()
+    {
+        return imagePath;
+    }
 }
