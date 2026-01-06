@@ -18,9 +18,11 @@ public class AnkiImport
 
             // Derefter kommer data: En linje per kunstværk
             boolean filslut = false;
-            while (!filslut) {
+            while (!filslut)
+            {
                 læstLinje = buf.readLine();
-                if (læstLinje == null) {
+                if (læstLinje == null)
+                {
                     filslut = true;
                 } else {
                     // Læs den opdelte linje ind i arrayet felter
