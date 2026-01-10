@@ -1,7 +1,6 @@
 package com.example.anki_flashcard_projekt;
 
 import javafx.scene.image.Image;
-
 import java.io.Serializable;
 
 // Denne klasse skal kunne gemmes på en fil -> derfor skal Serializable implementeres
@@ -10,25 +9,23 @@ public class Flashcard implements Serializable
     private static final long serialVersionUID = 1L; // ID til serialisering skal være unikt for hver klasse
 
     // Definition af attributterne
-    private String imagePath;   // Stien til billedet
-    private Image image;        // Billedet der fungere som et spørgsmål
-    private String answer;      // Titlen på kunstværket, kunstnerens navn, årstal
+    private String billedeSti;   // Stien til billedet
+    private String svar;      // Svaret: Titlen på kunstværket, kunstnerens navn, årstal
 
     // Konstruktør
-    public Flashcard(String imagePath, String answer)
+    public Flashcard(String svar, String billedeSti)
     {
-        this.imagePath = imagePath;
-        this.answer = answer;
-        this.image = new Image(getClass().getResourceAsStream(imagePath)); // Henter billedet fra resources
+        this.svar = svar;
+        this.billedeSti = billedeSti;
     }
 
-    public String getAnswer()
+    public String getSvar()
     {
-        return answer;
+        return svar;
     }
 
-    public Image getImage()
+    public Image getBilledeSti()
     {
-        return image;
+        return new Image(getClass().getResourceAsStream(billedeSti));
     }
 }
