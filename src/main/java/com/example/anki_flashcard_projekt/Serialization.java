@@ -2,7 +2,6 @@ package com.example.anki_flashcard_projekt;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import java.io.*;
 
 public class Serialization
@@ -46,7 +45,7 @@ public class Serialization
             liste.add(f); // Tilføjer objektet til ObservableListen
         }
 
-        objectInputStream.close(); // lukker strømmen for at ungå resource leaks
-        return (ObservableList<Flashcard>) liste; // returnere listen, så listen opdateres
+        objectInputStream.close(); // Lukker strømmen
+        return (ObservableList<Flashcard>) liste; // Returnere listen, så listen opdateres
     }
 }
