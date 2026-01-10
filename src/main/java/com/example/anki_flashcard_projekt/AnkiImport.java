@@ -2,60 +2,96 @@ package com.example.anki_flashcard_projekt;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
-// Klasse der importere flashcards fra en tab-separeret fil
+// Klasse der importere flashcards fra en tab-separeret anki-fil
 public class AnkiImport
 {
-    // Metoden returnere en liste af Flashcard objekter, så vi kan gemme listen i Controlleren og bruge flashkortene
-    public static ObservableList<Flashcard> importerAnkiFil(String filnavn) {
-        ObservableList<Flashcard> flashcards = null;
+    // Metoden returnere en liste af Flashcard objekter, så vi kan bruge listen i Controlleren
+    public static ObservableList<Flashcard> importerAnkiFil()
+    {
+        // Opretter en tom liste til objekterne der skal importeres fra filen
+        ObservableList<Flashcard> flashcards = FXCollections.observableArrayList();
+
         try {
-            flashcards = FXCollections.observableArrayList();
+            // Henter filen i ressource mappen
+            InputStream is = AnkiImport.class.getResourceAsStream("/com/example/anki_flashcard_projekt/GreatArtistFlashcards.txt");
 
-            BufferedReader buf = new BufferedReader(new FileReader("GreatArtistFlashcards.txt"));
-            String læstLinje;
-            String[] felter; // Array til oplysningerne i en linje
-
-            // Spring de første 6 linjer over i filen - dem skal vi ikke bruge
-            for (int i = 0; i < 6; i++)
-                læstLinje = buf.readLine();
-
-            // Derefter kommer data: En linje per kunstværk
-            boolean filslut = false;
-            while (!filslut)
+            // Hvis filen ikke findes, så får brugeren besked og metoden stoppes ved at der returneres en tom liste
+            if (is == null)
             {
-                læstLinje = buf.readLine();
-                if (læstLinje == null)
-                {
-                    filslut = true;
-                } else {
-                    // Læs den opdelte linje ind i arrayet felter
-                    felter = læstLinje.split("\t");
-
-                    // Henter titel, kunstner og årstal i anki-filen og gemmer dem som answer
-                    String title = felter[0];
-                    String kunstner = felter[1];
-                    String årstal = felter[2];
-                    String answer = title + "/n" + kunstner + "/n" + årstal;
-
-                    // Henter billedets filnavn i anki-filen og gemmer fil stien
-                    String billedFilNavn = felter[3];
-                    String imagePath = "/com.example.anki_flashcard_projekt/images/" + billedFilNavn;
-
-                    // Flashcard objekt oprettes med billede og svar, og tilføjes til vores ObservableList
-                    flashcards.add(new Flashcard(answer, imagePath));
-                }
+                System.out.println("Fejl: Kunne ikke finde GreatArtistFlashcards.txt");
+                return flashcards;
             }
-            buf.close();
 
+            // Læser filen linje for linje
+            BufferedReader buf = new BufferedReader(new InputStreamReader(is)); // InputStreamReader konvertere bytes til tekst
+            String læstLinje; // Indeholder 1 linje tekst af gangen
+            String[] felter; // Array til at indeholde tekst-elementerne i kolonner
+
+            // Spring de første 6 linjer over i filen
+            for (int i = 0; i < 6; i++)
+                læstLinje = buf.readLine(); // Linjerne læses, men bruges ikke aka. de gemmes ikke i arrayet
+
+            // while-løkke der kører så længe der stadig er en linje at læse
+            while ((læstLinje = buf.readLine()) != null)
+            {
+                // Opdeler linjen i kolonner vha. tab-tegnet
+                felter = læstLinje.split("\t");
+
+                // Spring linjer over, der ikke har nok felter
+                if (felter.length < 9) continue;
+
+                // Renser billede filnavnet
+                String billedFilNavn = felter[3].replace("&nbsp;", "") // Fjerner &nbsp;
+                        .replace("<img", "").replace("src=", "")
+                        .replace("\"", "").replace(">", "")
+                        .replace("/", "").trim();
+
+                // Renser kunstner navnet
+                String kunstner = felter[4].replace("&nbsp;", "") // Fjerner &nbsp;
+                        .replaceAll("<[^>]+>", "") // Fjerner HTML tags <div> <span>
+                        .replace("\"", "").trim(); // Fjerner ekstra "
+                //System.out.println("Kunstner: " + kunstner);
+
+                // Renser titlen på kunstværket
+                String title = felter[5].replace("&nbsp;", "") // Fjerner &nbsp;
+                        .replaceAll("<[^>]+>", "") // Fjerner HTML tags <div> <i>
+                        .replaceAll("<!--.*?-->", "") //Fjerner HTML kommentar
+                        .replace("\"", "").trim(); // Fjerner ekstra "
+                //System.out.println("Titel: " + title);
+
+                // Renser årstallet på kunstværket
+                String årstal = felter[7].replace("&nbsp;", "") // Fjerner &nbsp;
+                        .replaceAll("<[^>]+>", "") // Fjerner HTML tags <span>
+                        .replaceAll("<!--.*?-->", "") //Fjerner HTML kommentar
+                        .replace("\"", "").trim(); // Fjerner ekstra "
+                //System.out.println("Årstal: " + årstal);
+
+                // Renser tidsalderen på kunstværket
+                String tidsalder = felter[8].replace("&nbsp;", "")
+                        .replaceAll("<[^>]+>", "") // Fjerner HTML tags <span>
+                        .replace("\"", "").trim(); // Fjerner ekstra "
+                //System.out.println("Tidsalder: " + tidsalder);
+
+                // Laver svaret
+                String svar = kunstner + "\n" + title + "\n" + årstal + "\n" + tidsalder;
+
+                // Laver stien til billedet
+                String billedeSti = "/com/example/anki_flashcard_projekt/images/" + billedFilNavn;
+                //System.out.println("Billede sti: " + billedeSti);
+
+                // Opret flashcard og tilføj det til listen
+                flashcards.add(new Flashcard(svar, billedeSti));
+            }
+            buf.close(); // Når filen er færdig-læst lukkes forbindelsen til filen
         }
-        catch (Exception e)
+        catch (Exception e) // Fanger fejl
         {
-            e.printStackTrace();
+            e.printStackTrace(); // Udskriver fejlen
         }
-        return flashcards;
+        return flashcards; // Returnere en liste af Flashcard objekter, så vi kan bruge listen i Controlleren
     }
 }

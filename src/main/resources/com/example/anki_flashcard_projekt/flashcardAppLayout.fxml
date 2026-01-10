@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
 <GridPane hgap="14.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" vgap="14.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.anki_flashcard_projekt.Controller">
@@ -53,7 +54,6 @@
       <Button mnemonicParsing="false" onMouseClicked="#handleButtonPause" text="Pause" GridPane.columnIndex="5" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
       <Button mnemonicParsing="false" onMouseClicked="#handleButtonStartForfra" text="Start forfra" GridPane.columnIndex="6" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
       <Button mnemonicParsing="false" onMouseClicked="#handleButtonAfslut" text="Afslut" GridPane.columnIndex="8" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="12" />
-      <ImageView fx:id="imageField" fitHeight="284.0" fitWidth="511.0" pickOnBounds="true" preserveRatio="true" GridPane.columnSpan="4" GridPane.rowSpan="7" />
       <Button mnemonicParsing="false" onMouseClicked="#handleButtonVisSvar" style="-fx-background-color: #007bff;" text="Vis svar" textFill="WHITE" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="8">
          <effect>
             <InnerShadow height="10.0" radius="4.5" width="10.0" />
@@ -62,7 +62,6 @@
             <Font name="Arial Black" size="12.0" />
          </font>
       </Button>
-      <TextArea fx:id="answerField" prefHeight="200.0" prefWidth="498.0" GridPane.columnSpan="4" GridPane.rowIndex="9" />
       <Label text="Vurder dit svar:" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="10" />
       <Label text="Ikke korrekte:" GridPane.columnIndex="5" GridPane.columnSpan="2" GridPane.rowIndex="6" GridPane.valignment="TOP" />
       <Label fx:id="labelAntalKort" GridPane.columnIndex="8" GridPane.columnSpan="2" GridPane.rowIndex="1" />
@@ -87,7 +86,7 @@
             <Font name="Arial Black" size="11.0" />
          </font>
       </Button>
-      <Button mnemonicParsing="false" onMouseClicked="#handleButtonVisDelvisKorrekt" style="-fx-background-color: #fd7e14;" text="Delvis korrekt" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="11">
+      <Button mnemonicParsing="false" onMouseClicked="#handleButtonDelvisKorrekt" style="-fx-background-color: #fd7e14;" text="Delvis korrekt" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="11">
          <effect>
             <InnerShadow height="10.0" radius="4.5" width="10.0" />
          </effect>
@@ -112,6 +111,13 @@
          </font>
       </Button>
       <Button mnemonicParsing="false" onMouseClicked="#handleButtonImportAnkiFlashcardSet" prefWidth="215.0" text="+ Importer Anki træningssæt" GridPane.columnIndex="5" GridPane.columnSpan="5" GridPane.halignment="CENTER" GridPane.rowIndex="11" />
+      <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowSpan="7" GridPane.valignment="CENTER">
+         <children>
+            <ImageView fx:id="billedeFelt" fitHeight="284.0" fitWidth="511.0" pickOnBounds="true" preserveRatio="true" />
+         </children>
+      </StackPane>
+      <TextArea prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="9" />
+      <Label fx:id="svarFelt" textAlignment="CENTER" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="9" GridPane.valignment="CENTER" />
    </children>
    <padding>
       <Insets bottom="14.0" left="14.0" right="14.0" top="14.0" />
