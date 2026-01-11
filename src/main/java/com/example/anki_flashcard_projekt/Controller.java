@@ -1,14 +1,11 @@
 package com.example.anki_flashcard_projekt;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import java.io.IOException;
-
-import static com.example.anki_flashcard_projekt.Serialization.skrivFlashcardObjekterNedIFil;
+import java.util.ArrayList;
 
 public class Controller
 {
@@ -19,78 +16,84 @@ public class Controller
     private ImageView billedeFelt;
 
     @FXML
+    private Label labelAntalKorrekte;
+
+    @FXML
+    private Label labelAntalNæstenKorrekte;
+
+    @FXML
     private Label labelAntalDelvisKorrekte;
 
     @FXML
     private Label labelAntalIkkeKorrekte;
 
     @FXML
-    private Label labelAntalKorrekte;
-
-    @FXML
     private Label labelAntalKort;
-
-    @FXML
-    private Label labelAntalNæstenKorrekte;
 
     @FXML
     private Label labelIkkeSpillet;
 
-    // Definition af listen der holder kortene
-    private ObservableList<Flashcard> flashcards = FXCollections.observableArrayList();
-
-    // Holder styr på hvilket kort der vises lige nu
-    private int nuværendeFlashcardDerVises = 0;
-
-    // Holder styr på brugerens vurdering af svar
-    private int korrekt = 0;
-    private int næsten_korrekt = 0;
-    private int delvis_korrekt = 0;
-    private int ikke_korrekt = 0;
+    private Træningssession træningssession;
 
     public void initialize()
     {
         try
         {
-            ObservableList<Flashcard> flashcards = Serialization.indlæsFlashcardObjekterFraFil(); // Indlæser data fra fil
+            // Indlæser en tidligere gemt træningssession fra filen Træningssession.dat
+            træningssession = Serialization.indlæsTræningssession();
         }
-        catch (Exception e) // Ved fejl i indlæsning af filerne får brugeren besked
+        catch (Exception e) // Hvis der opstår en fejl under indlæsningen,
         {
-            System.out.println("Fejl ved indlæsning af filer");
+            // så oprettes der en ny Træningssession, så man starter på en frisk
+            træningssession = new Træningssession(new ArrayList<>(AnkiImport.importerAnkiFil()));
         }
+
+        // Opdatere tællerne
         opdaterTræningsstatus();
-        visNæsteKort();
+
+        // Henter Flashcard
+        visFlashcard();
     }
 
     // Metode der bruges til at gemme data når brugeren lukker programmet
     public void gemData() throws IOException
     {
-        skrivFlashcardObjekterNedIFil(flashcards); // Gemmer Flashcard-objekter i filen flashcards.txt
+        Serialization.gemTræningssession(træningssession);
     }
 
-    // Metode der skifter til næste kort i ObservableList
+    // Metode der skifter til næste kort
     private void næsteKort()
     {
-        svarFelt.setText(""); // Svaret fjernes, så feltet er tomt og klar til næste svar
-        nuværendeFlashcardDerVises = nuværendeFlashcardDerVises + 1; // Vi tæller op hver gang der vises et flashcard
+        // Svaret fjernes, så feltet er tomt og klar til næste svar
+        svarFelt.setText("");
+
+        // Henter index på det flashcard der vises lige nu, og lægger 1 til, for at få næste kort
+        int nuværendeFlashcardDerVises = træningssession.getNuværendeFlashcardDerVises() + 1;
 
         // Hvis der ikke er flere flashcards
-        if (nuværendeFlashcardDerVises >= flashcards.size())
+        if (nuværendeFlashcardDerVises >= træningssession.getFlashcards().size())
         {
             nuværendeFlashcardDerVises = 0; // Starter listen forfra
         }
 
-        visNæsteKort(); // Henter billedet til næste flashcard
-        opdaterTræningsstatus(); // Opdaterer tallene
+        // Gemmer hvilket flashcard-objekt der vises lige nu
+        træningssession.setNuværendeFlashcardDerVises(nuværendeFlashcardDerVises);
+
+        // Henter billedet til næste flashcard
+        visFlashcard();
+
+        // Opdaterer tællerne
+        opdaterTræningsstatus();
     }
 
     // Metode der viser billedet til det næste kort
-    private void visNæsteKort()
+    private void visFlashcard()
     {
         // Tjekker at der findes flashcards
-        if (!flashcards.isEmpty())
+        if (!træningssession.getFlashcards().isEmpty())
         {
-            billedeFelt.setImage(flashcards.get(nuværendeFlashcardDerVises).getBilledeSti()); // Henter og indsætter billedet
+            // Henter og indsætter billedet
+            billedeFelt.setImage(træningssession.getFlashcards().get(træningssession.getNuværendeFlashcardDerVises()).getBillede());
         }
     }
 
@@ -98,7 +101,9 @@ public class Controller
     @FXML
     void handleButtonKorrekt(MouseEvent event)
     {
-        korrekt = korrekt + 1;
+        // Tæller 1 op i korrekt
+        træningssession.setKorrekt(træningssession.getKorrekt() + 1);
+        // Hopper videre til næste flashcard
         næsteKort();
     }
 
@@ -106,7 +111,9 @@ public class Controller
     @FXML
     void handleButtonNæstenKorrekt(MouseEvent event)
     {
-        næsten_korrekt = næsten_korrekt + 1;
+        // Tæller 1 op i næsten korrekt
+        træningssession.setNæstenKorrekt(træningssession.getNæstenKorrekt() + 1);
+        // Hopper videre til næste flashcard
         næsteKort();
     }
 
@@ -114,7 +121,9 @@ public class Controller
     @FXML
     void handleButtonDelvisKorrekt(MouseEvent event)
     {
-        delvis_korrekt = delvis_korrekt + 1;
+        // Tæller 1 op i delvis korrekt
+        træningssession.setDelvisKorrekt(træningssession.getDelvisKorrekt() + 1);
+        // Hopper videre til næste flashcard
         næsteKort();
     }
 
@@ -122,53 +131,41 @@ public class Controller
     @FXML
     void handleButtonIkkeKorrekt(MouseEvent event)
     {
-        ikke_korrekt = ikke_korrekt + 1;
+        // Tæller 1 op i ikke korrekt
+        træningssession.setIkkeKorrekt(træningssession.getIkkeKorrekt() + 1);
+        // Hopper videre til næste flashcard
         næsteKort();
     }
 
     // Metode der opdaterer tallene over i træningsstatus
     private void opdaterTræningsstatus()
     {
-        labelAntalKort.setText(String.valueOf(flashcards.size()));
-        labelAntalKorrekte.setText(String.valueOf(korrekt));
-        labelAntalNæstenKorrekte.setText(String.valueOf(næsten_korrekt));
-        labelAntalDelvisKorrekte.setText(String.valueOf(delvis_korrekt));
-        labelAntalIkkeKorrekte.setText(String.valueOf(ikke_korrekt));
+        labelAntalKort.setText(String.valueOf(træningssession.getFlashcards().size()));
+        labelAntalKorrekte.setText(String.valueOf(træningssession.getKorrekt()));
+        labelAntalNæstenKorrekte.setText(String.valueOf(træningssession.getNæstenKorrekt()));
+        labelAntalDelvisKorrekte.setText(String.valueOf(træningssession.getDelvisKorrekt()));
+        labelAntalIkkeKorrekte.setText(String.valueOf(træningssession.getIkkeKorrekt()));
 
-        int spilledeKort = korrekt + næsten_korrekt + delvis_korrekt + ikke_korrekt;
+        int spilledeKort = træningssession.getKorrekt() + træningssession.getNæstenKorrekt() + træningssession.getDelvisKorrekt() + træningssession.getIkkeKorrekt();
 
-        labelIkkeSpillet.setText(String.valueOf(flashcards.size() - spilledeKort));
+        labelIkkeSpillet.setText(String.valueOf(træningssession.getFlashcards().size() - spilledeKort));
     }
 
     // Metode til irrelevant-flashcard-knappen
     @FXML
     void handleButtonIrrelevantFlashcard(MouseEvent event)
     {
-        flashcards.remove(nuværendeFlashcardDerVises);
+        if(træningssession.getFlashcards().isEmpty()) return;
 
-        if (nuværendeFlashcardDerVises >= flashcards.size())
+        træningssession.getFlashcards().remove(træningssession.getNuværendeFlashcardDerVises());
+
+        if (træningssession.getNuværendeFlashcardDerVises() >= træningssession.getFlashcards().size())
         {
-            nuværendeFlashcardDerVises = 0;
+            træningssession.setNuværendeFlashcardDerVises(0);
         }
 
         opdaterTræningsstatus();
-        visNæsteKort();
-    }
-
-    // Metode til import-knappen
-    @FXML
-    void handleButtonImportAnkiFlashcardSet(MouseEvent event)
-    {
-        flashcards = AnkiImport.importerAnkiFil();
-
-        nuværendeFlashcardDerVises = 0;
-        korrekt = 0;
-        næsten_korrekt = 0;
-        delvis_korrekt = 0;
-        ikke_korrekt = 0;
-
-        opdaterTræningsstatus();
-        visNæsteKort();
+        visFlashcard();
     }
 
     // Metode til pause-knappen
@@ -182,32 +179,35 @@ public class Controller
     @FXML
     void handleButtonStartForfra(MouseEvent event)
     {
-        nuværendeFlashcardDerVises = 0;
-        korrekt = 0;
-        næsten_korrekt = 0;
-        delvis_korrekt = 0;
-        ikke_korrekt = 0;
-
+        træningssession.startForfra();
         svarFelt.setText("");
 
         opdaterTræningsstatus();
-        visNæsteKort();
+        visFlashcard();
     }
 
     // Metode til afslut-knappen
     @FXML
     void handleButtonAfslut(MouseEvent event)
     {
-
+        try
+        {
+            Serialization.gemTræningssession(træningssession);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        System.exit(0);
     }
 
     // Metode til vis-svar knappen
     @FXML
     void handleButtonVisSvar(MouseEvent event)
     {
-        if(!flashcards.isEmpty())
+        if(!træningssession.getFlashcards().isEmpty())
         {
-            svarFelt.setText(flashcards.get(nuværendeFlashcardDerVises).getSvar());
+            svarFelt.setText(træningssession.getFlashcards().get(træningssession.getNuværendeFlashcardDerVises()).getSvar());
         }
     }
 }

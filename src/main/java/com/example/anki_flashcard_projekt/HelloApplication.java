@@ -3,7 +3,6 @@ package com.example.anki_flashcard_projekt;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -25,16 +24,11 @@ public class HelloApplication extends Application
         {
             try
             {
-                controller.gemData(); // Alle objekterne gemmes
+                controller.gemData(); // Alt gemmes
             }
-            catch (IOException ex) // Hvis der sker fejl, så får brugeren besked
+            catch (Exception ex) // Hvis der sker fejl, så får brugeren besked
             {
-                e.consume(); // Forhindre vinduet i at lukke, så brugeren kan se fejlmeddelelsen
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Fejl");
-                alert.setHeaderText("Kunne ikke gemme data");
-                alert.setContentText("En fejl skete i forbindelse med at gemme data");
-                alert.showAndWait();
+                ex.printStackTrace(); // Udskriver fejlen
             }
         });
     }

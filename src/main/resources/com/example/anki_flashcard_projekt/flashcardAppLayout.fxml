@@ -110,7 +110,6 @@
             <Font name="Arial Black" size="11.0" />
          </font>
       </Button>
-      <Button mnemonicParsing="false" onMouseClicked="#handleButtonImportAnkiFlashcardSet" prefWidth="215.0" text="+ Importer Anki træningssæt" GridPane.columnIndex="5" GridPane.columnSpan="5" GridPane.halignment="CENTER" GridPane.rowIndex="11" />
       <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowSpan="7" GridPane.valignment="CENTER">
          <children>
             <ImageView fx:id="billedeFelt" fitHeight="284.0" fitWidth="511.0" pickOnBounds="true" preserveRatio="true" />

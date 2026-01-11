@@ -24,7 +24,7 @@ public class Flashcard implements Serializable
         return svar;
     }
 
-    public Image getBilledeSti()
+    public Image getBillede()
     {
         return new Image(getClass().getResourceAsStream(billedeSti));
     }

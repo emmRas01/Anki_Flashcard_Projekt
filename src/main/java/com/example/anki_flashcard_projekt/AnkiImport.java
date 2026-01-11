@@ -1,19 +1,19 @@
 package com.example.anki_flashcard_projekt;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 // Klasse der importere flashcards fra en tab-separeret anki-fil
 public class AnkiImport
 {
-    // Metoden returnere en liste af Flashcard objekter, så vi kan bruge listen i Controlleren
-    public static ObservableList<Flashcard> importerAnkiFil()
+    // Metoden returnere en array liste af Flashcard objekter, så vi kan bruge listen i Controlleren
+    public static List<Flashcard> importerAnkiFil()
     {
         // Opretter en tom liste til objekterne der skal importeres fra filen
-        ObservableList<Flashcard> flashcards = FXCollections.observableArrayList();
+        List<Flashcard> flashcards = new ArrayList<>();
 
         try {
             // Henter filen i ressource mappen
@@ -44,8 +44,8 @@ public class AnkiImport
                 // Spring linjer over, der ikke har nok felter
                 if (felter.length < 9) continue;
 
-                // Renser billede filnavnet
-                String billedFilNavn = felter[3].replace("&nbsp;", "") // Fjerner &nbsp;
+                // Renser billedets filnavn
+                String billedFilNavn = felter[3].replace("&nbsp;", "")
                         .replace("<img", "").replace("src=", "")
                         .replace("\"", "").replace(">", "")
                         .replace("/", "").trim();
@@ -83,7 +83,7 @@ public class AnkiImport
                 String billedeSti = "/com/example/anki_flashcard_projekt/images/" + billedFilNavn;
                 //System.out.println("Billede sti: " + billedeSti);
 
-                // Opret flashcard og tilføj det til listen
+                // Opret flashcard og tilføj det til array listen
                 flashcards.add(new Flashcard(svar, billedeSti));
             }
             buf.close(); // Når filen er færdig-læst lukkes forbindelsen til filen
@@ -92,6 +92,6 @@ public class AnkiImport
         {
             e.printStackTrace(); // Udskriver fejlen
         }
-        return flashcards; // Returnere en liste af Flashcard objekter, så vi kan bruge listen i Controlleren
+        return flashcards; // Returnere en array liste af Flashcard objekter, så vi kan bruge listen i Controlleren
     }
 }
