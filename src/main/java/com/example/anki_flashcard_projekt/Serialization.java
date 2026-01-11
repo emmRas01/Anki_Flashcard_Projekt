@@ -1,51 +1,42 @@
 package com.example.anki_flashcard_projekt;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import java.io.*;
 
 public class Serialization
 {
-    // Metode der gemmer en liste af Flashcard-objekter i filen Flashcard.txt
-    public static void skrivFlashcardObjekterNedIFil(ObservableList<Flashcard> flashcards) throws IOException
+    // Metode der gemmer et træningssession-objekt i filen Træningssession.dat
+    public static void gemTræningssession(Træningssession træningssession) throws IOException
     {
-        // Opretter en binær fil kaldet flashcards.txt
-        FileOutputStream fileOutputStream = new FileOutputStream("flashcards.txt");
-        // Opretter en ObjectOutputStream, der kan gemme objekter ned på en fil
+        // Opretter en binær fil kaldet Træningssession.dat
+        FileOutputStream fileOutputStream = new FileOutputStream("Træningssession.dat");
+
+        // Opretter en ObjectOutputStream, der kan gemme objekter ned på filen
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
 
-        // I filen starter objectOutputStream.writeInt med at skrive hvor mange flashcards der findes i heltal
-        // (gør det lettere at læse filen)
-        objectOutputStream.writeInt(flashcards.size());
+        // Skriver træningssession-objektet ned i filen
+        objectOutputStream.writeObject(træningssession);
 
-        // for-løkke der kører alle flashcards igennem
-        for (Flashcard f : flashcards)
-            objectOutputStream.writeObject(f); // Skriver et Flashcard i filen
-
-        objectOutputStream.flush();
-        objectOutputStream.close(); // Sikre at alle data er gemt ved at lukke strømmen
+        // Sikre at alle data er gemt ved at lukke strømmen
+        objectOutputStream.close();
     }
 
-    // Metode der indlæser gemte Flashcards fra filen flashcards.txt
-    public static ObservableList<Flashcard> indlæsFlashcardObjekterFraFil() throws IOException, ClassNotFoundException
+    // Metode der indlæser et træningssession-objekt fra filen Træningssession.dat
+    public static Træningssession indlæsTræningssession() throws IOException, ClassNotFoundException
     {
-        // Opretter en tom ObservableList, der senere skal indeholde alle de gemte Flashcard objekter fra filen
-        ObservableList<Flashcard> liste = FXCollections.observableArrayList();
-        // Åbner filen flashcards.txt så den kan læses
-        FileInputStream fileInputStream = new FileInputStream("flashcards.txt");
+        // Åbner filen Træningssession.dat, så den kan indlæses
+        FileInputStream fileInputStream = new FileInputStream("Træningssession.dat");
+
         // Opretter ObjectInputStream der kan læse objekter i en fil
         ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
 
-        // Først læses heltallet der angiver hvor mange Flashcard objekter filen indeholder
-        int antal = objectInputStream.readInt();
-        // for-løkken kører alle Flashcard objekterne igennem
-        for (int i = 0; i < antal; ++i)
-        {
-            Flashcard f = (Flashcard) objectInputStream.readObject(); // Læser objektet
-            liste.add(f); // Tilføjer objektet til ObservableListen
-        }
+        // Indlæser træningssession-objekt fra filen
+        Træningssession træningssession = (Træningssession) objectInputStream.readObject();
+        // typecast (Træningssession) fortæller Java at det er et Træningssession-objekt
 
-        objectInputStream.close(); // Lukker strømmen
-        return (ObservableList<Flashcard>) liste; // Returnere listen, så listen opdateres
+        // Lukker strømmen
+        objectInputStream.close();
+
+        // Returnere det indlæste træningssession-objekt
+        return træningssession;
     }
 }
