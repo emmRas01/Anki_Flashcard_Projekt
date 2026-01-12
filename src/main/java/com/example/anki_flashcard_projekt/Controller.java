@@ -36,6 +36,8 @@ public class Controller
 
     private Træningssession træningssession;
 
+    private boolean erSvaretVist = false;
+
     public void initialize()
     {
         try
@@ -110,6 +112,9 @@ public class Controller
     @FXML
     void handleButtonKorrekt(MouseEvent event)
     {
+        // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
+        if (!erSvaretVist) {return;}
+
         // Tæller 1 op i korrekt
         træningssession.setKorrekt(træningssession.getKorrekt() + 1);
         // Hopper videre til næste flashcard
@@ -120,6 +125,9 @@ public class Controller
     @FXML
     void handleButtonNæstenKorrekt(MouseEvent event)
     {
+        // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
+        if (!erSvaretVist) {return;}
+
         // Tæller 1 op i næsten korrekt
         træningssession.setNæstenKorrekt(træningssession.getNæstenKorrekt() + 1);
         // Hopper videre til næste flashcard
@@ -130,6 +138,9 @@ public class Controller
     @FXML
     void handleButtonDelvisKorrekt(MouseEvent event)
     {
+        // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
+        if (!erSvaretVist) {return;}
+
         // Tæller 1 op i delvis korrekt
         træningssession.setDelvisKorrekt(træningssession.getDelvisKorrekt() + 1);
         // Hopper videre til næste flashcard
@@ -140,6 +151,9 @@ public class Controller
     @FXML
     void handleButtonIkkeKorrekt(MouseEvent event)
     {
+        // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
+        if (!erSvaretVist) {return;}
+
         // Tæller 1 op i ikke korrekt
         træningssession.setIkkeKorrekt(træningssession.getIkkeKorrekt() + 1);
         // Hopper videre til næste flashcard
@@ -236,6 +250,7 @@ public class Controller
             // Indsætter svaret på det flashcard der vises lige nu
             svarFelt.setText(træningssession.getFlashcards().get(træningssession.getNuværendeFlashcardDerVises()).getSvar());
         }
+        erSvaretVist = true;
     }
 
     public void tjekOmAlleSvarErKorrekte()
