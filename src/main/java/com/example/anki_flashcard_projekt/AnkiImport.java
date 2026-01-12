@@ -68,7 +68,7 @@ public class AnkiImport
                         .replaceAll("<[^>]+>", "") // Fjerner HTML tags <span>
                         .replaceAll("<!--.*?-->", "") //Fjerner HTML kommentar
                         .replace("\"", "").trim(); // Fjerner ekstra "
-                //System.out.println("Årstal: " + årstal);
+                // System.out.println("Årstal: " + årstal);
 
                 // Renser tidsalderen på kunstværket
                 String tidsalder = felter[8].replace("&nbsp;", "")
