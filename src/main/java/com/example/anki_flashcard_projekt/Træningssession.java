@@ -2,6 +2,7 @@ package com.example.anki_flashcard_projekt;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 // Denne klasse skal kunne gemmes på en fil -> derfor skal Serializable implementeres
@@ -98,6 +99,9 @@ public class Træningssession implements Serializable
     {
         // Henter alle kortene
         flashcards = new ArrayList<>(alleFlashcards);
+
+        // Blander flashcards
+        Collections.shuffle(flashcards);
 
         // Nulstiller tællerne
         nuværendeFlashcardDerVises = 0;

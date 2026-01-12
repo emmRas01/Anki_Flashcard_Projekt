@@ -54,7 +54,7 @@ public class AnkiImport
                 String kunstner = felter[4].replace("&nbsp;", "") // Fjerner &nbsp;
                         .replaceAll("<[^>]+>", "") // Fjerner HTML tags <div> <span>
                         .replace("\"", "").trim(); // Fjerner ekstra "
-                //System.out.println("Kunstner: " + kunstner);
+                // System.out.println("Kunstner: " + kunstner);
 
                 // Renser titlen på kunstværket
                 String title = felter[5].replace("&nbsp;", "") // Fjerner &nbsp;

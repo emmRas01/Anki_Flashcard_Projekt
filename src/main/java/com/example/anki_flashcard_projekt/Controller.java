@@ -1,6 +1,7 @@
 package com.example.anki_flashcard_projekt;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -70,10 +71,11 @@ public class Controller
         // Henter index på det flashcard der vises lige nu, og lægger 1 til, for at få næste kort
         int nuværendeFlashcardDerVises = træningssession.getNuværendeFlashcardDerVises() + 1;
 
-        // Hvis der ikke er flere flashcards
+        // Tjekker om vi er på sidste flashcard, hvis ja -> metoden stoppes her og der tjekkes om alle svar er korrekte
         if (nuværendeFlashcardDerVises >= træningssession.getFlashcards().size())
         {
-            nuværendeFlashcardDerVises = 0; // Starter listen forfra
+            tjekOmAlleSvarErKorrekte();
+            return;
         }
 
         // Gemmer hvilket flashcard-objekt der vises lige nu
@@ -84,17 +86,24 @@ public class Controller
 
         // Opdaterer tællerne
         opdaterTræningsstatus();
+
+        // Tjekker om spillet er færdigt
+        tjekOmAlleSvarErKorrekte();
     }
 
     // Metode der viser billedet til det næste kort
     private void visFlashcard()
     {
-        // Tjekker at der findes flashcards
-        if (!træningssession.getFlashcards().isEmpty())
-        {
-            // Henter og indsætter billedet
-            billedeFelt.setImage(træningssession.getFlashcards().get(træningssession.getNuværendeFlashcardDerVises()).getBillede());
-        }
+        // Tjekker at der findes flashcards, hvis ikke -> metoden stoppes her
+        if(træningssession.getFlashcards().isEmpty()) {return;}
+
+        // Henter index på det flashcard der vises lige nu
+        int index = træningssession.getNuværendeFlashcardDerVises();
+        // Tjekker om vi er på sidste flashcard, hvis ja -> metoden stoppes her
+        if (index >= træningssession.getFlashcards().size()) {return;}
+
+        // Henter og indsætter billedet
+        billedeFelt.setImage(træningssession.getFlashcards().get(træningssession.getNuværendeFlashcardDerVises()).getBillede());
     }
 
     // Metode til korrekt-knappen
@@ -155,16 +164,23 @@ public class Controller
     @FXML
     void handleButtonIrrelevantFlashcard(MouseEvent event)
     {
+        // Hvis der ikke findes flashcards, så stoppes metoden her
         if(træningssession.getFlashcards().isEmpty()) return;
 
+        // Fjerner det flashcard der vises fra array listen med flashcards
         træningssession.getFlashcards().remove(træningssession.getNuværendeFlashcardDerVises());
 
+        // Hvis det er sidste flashcard i listen
         if (træningssession.getNuværendeFlashcardDerVises() >= træningssession.getFlashcards().size())
         {
+            // Startes der forfra i arraylisten
             træningssession.setNuværendeFlashcardDerVises(0);
         }
 
+        // Opdaterer tællerne
         opdaterTræningsstatus();
+
+        // Henter billedet til næste flashcard
         visFlashcard();
     }
 
@@ -179,10 +195,16 @@ public class Controller
     @FXML
     void handleButtonStartForfra(MouseEvent event)
     {
+        // Kalder startForfra metoden
         træningssession.startForfra();
+
+        // Fjerner svaret fra det tidligere flashcard
         svarFelt.setText("");
 
+        // Opdaterer tællerne
         opdaterTræningsstatus();
+
+        // Henter billedet til næste flashcard
         visFlashcard();
     }
 
@@ -192,12 +214,15 @@ public class Controller
     {
         try
         {
+            // Gemmer træningssessionen, så den kan genoptages når man åbner programmet igen
             Serialization.gemTræningssession(træningssession);
         }
         catch (Exception e)
         {
+            // Hvis der sker fejl udskrives fejlen
             e.printStackTrace();
         }
+        // Lukker programmet
         System.exit(0);
     }
 
@@ -205,9 +230,40 @@ public class Controller
     @FXML
     void handleButtonVisSvar(MouseEvent event)
     {
+        // Tjekker at der findes flashcards
         if(!træningssession.getFlashcards().isEmpty())
         {
+            // Indsætter svaret på det flashcard der vises lige nu
             svarFelt.setText(træningssession.getFlashcards().get(træningssession.getNuværendeFlashcardDerVises()).getSvar());
         }
+    }
+
+    public void tjekOmAlleSvarErKorrekte()
+    {
+        // Henter antal flashcards i hele bunken
+        int antalFlashcards = træningssession.getFlashcards().size();
+
+        // Hvis der ingen flashcards findes -> metoden stoppes
+        if(antalFlashcards == 0) {return;}
+
+        // Henter antal flashcard der er spillet
+        int antalSpilledeKort = træningssession.getKorrekt() + træningssession.getNæstenKorrekt()
+                + træningssession.getDelvisKorrekt() + træningssession.getIkkeKorrekt();
+
+        // Tjekker om alle flashcards er spillet og om alle svar er korrekte
+        if (antalSpilledeKort == antalFlashcards && træningssession.getKorrekt() == antalFlashcards)
+        {
+            duHarVundet();
+        }
+    }
+
+    // Metode til at vise brugeren at alle flashcards er færdigspillet og korrekte
+    public void duHarVundet()
+    {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Godt klaret!");
+        alert.setHeaderText("Tillykke!");
+        alert.setContentText("Du har gennemført alle flashcards og svaret korrekt!");
+        alert.showAndWait();
     }
 }
