@@ -277,8 +277,15 @@ public class Controller
     {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Godt klaret!");
-        alert.setHeaderText("Tillykke!");
+        alert.setHeaderText("Tillykke!!!");
         alert.setContentText("Du har gennemført alle flashcards og svaret korrekt!");
         alert.showAndWait();
+
+        // Når brugeren klikker på OK starter spillet forfra
+        træningssession.startForfra();
+        svarFelt.setText("");
+        erSvaretVist = false;
+        opdaterTræningsstatus();
+        visFlashcard();
     }
 }

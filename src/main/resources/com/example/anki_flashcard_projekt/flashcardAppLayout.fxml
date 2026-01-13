@@ -115,7 +115,7 @@
             <ImageView fx:id="billedeFelt" fitHeight="284.0" fitWidth="511.0" pickOnBounds="true" preserveRatio="true" />
          </children>
       </StackPane>
-      <TextArea prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="9" />
+      <TextArea editable="false" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="9" />
       <Label fx:id="svarFelt" textAlignment="CENTER" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowIndex="9" GridPane.valignment="CENTER" />
    </children>
    <padding>
