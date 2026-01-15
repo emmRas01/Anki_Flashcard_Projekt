@@ -54,34 +54,29 @@ public class AnkiImport
                 String kunstner = felter[4].replace("&nbsp;", "") // Fjerner &nbsp;
                         .replaceAll("<[^>]+>", "") // Fjerner HTML tags <div> <span>
                         .replace("\"", "").trim(); // Fjerner ekstra "
-                // System.out.println("Kunstner: " + kunstner);
 
                 // Renser titlen på kunstværket
                 String title = felter[5].replace("&nbsp;", "") // Fjerner &nbsp;
                         .replaceAll("<[^>]+>", "") // Fjerner HTML tags <div> <i>
                         .replaceAll("<!--.*?-->", "") //Fjerner HTML kommentar
                         .replace("\"", "").trim(); // Fjerner ekstra "
-                //System.out.println("Titel: " + title);
 
                 // Renser årstallet på kunstværket
                 String årstal = felter[7].replace("&nbsp;", "") // Fjerner &nbsp;
                         .replaceAll("<[^>]+>", "") // Fjerner HTML tags <span>
                         .replaceAll("<!--.*?-->", "") //Fjerner HTML kommentar
                         .replace("\"", "").trim(); // Fjerner ekstra "
-                // System.out.println("Årstal: " + årstal);
 
                 // Renser tidsalderen på kunstværket
                 String tidsalder = felter[8].replace("&nbsp;", "")
                         .replaceAll("<[^>]+>", "") // Fjerner HTML tags <span>
                         .replace("\"", "").trim(); // Fjerner ekstra "
-                //System.out.println("Tidsalder: " + tidsalder);
 
                 // Laver svaret
                 String svar = kunstner + "\n" + title + "\n" + årstal + "\n" + tidsalder;
 
                 // Laver stien til billedet
                 String billedeSti = "/com/example/anki_flashcard_projekt/images/" + billedFilNavn;
-                //System.out.println("Billede sti: " + billedeSti);
 
                 // Opret flashcard og tilføj det til array listen
                 flashcards.add(new Flashcard(svar, billedeSti));

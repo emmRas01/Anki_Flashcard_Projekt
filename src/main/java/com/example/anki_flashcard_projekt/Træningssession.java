@@ -10,38 +10,53 @@ public class Træningssession implements Serializable
 {
     private static final long serialVersionUID = 2L; // ID til serialisering skal være unikt for hver klasse
 
-    // Definition af listen der holder kortene
-    private List<Flashcard> flashcards;
-
-    // Gemmer alle kort, så de kan hentes når man starter forfra
+    // Gemmer alle flashcards fra anki-filen, så de kan hentes hvis man starter spillet forfra
     private List<Flashcard> alleFlashcards;
+
+    // Indeholder de flashcards der spilles med i den aktuelle spilrunde
+    private List<Flashcard> aktuelleFlashcards;
 
     // Holder styr på hvilket kort der vises lige nu
     private int nuværendeFlashcardDerVises;
 
-    // Holder styr på brugerens vurdering af svar
+    // Tæller brugerens vurdering af svar
     private int korrekt = 0;
     private int næstenKorrekt = 0;
     private int delvisKorrekt = 0;
     private int ikkeKorrekt = 0;
 
+    // Spillede kort i denne runde bruges til at holde styr på, hvornår en
+    // ny runde skal startes med forkert besvaret kort, eller hvornår
+    // brugeren har vundet med 100% korrekte svar
+    private int spilledeKortIDenneRunde = 0;
+
     // Konstruktør
     public Træningssession(List<Flashcard> flashcards)
     {
-        this.flashcards = new ArrayList<>(flashcards);
+        this.aktuelleFlashcards = new ArrayList<>(flashcards);
         this.alleFlashcards = new ArrayList<>(flashcards);
         this.nuværendeFlashcardDerVises = 0;
     }
 
     // Getter og setter metoder
-    public List<Flashcard> getFlashcards()
+    public List<Flashcard> getAktuelleFlashcards()
     {
-        return flashcards;
+        return aktuelleFlashcards;
     }
 
     public List<Flashcard> getAlleFlashcards()
     {
         return alleFlashcards;
+    }
+
+    public int getSpilledeKortIDenneRunde()
+    {
+        return spilledeKortIDenneRunde;
+    }
+
+    public void setSpilledeKortIDenneRunde(int spilledeKortIDenneRunde)
+    {
+        this.spilledeKortIDenneRunde = spilledeKortIDenneRunde;
     }
 
     public int getNuværendeFlashcardDerVises()
@@ -83,7 +98,6 @@ public class Træningssession implements Serializable
     {
         this.delvisKorrekt = delvisKorrekt;
     }
-
     public int getIkkeKorrekt()
     {
         return ikkeKorrekt;
@@ -98,10 +112,10 @@ public class Træningssession implements Serializable
     public void startForfra()
     {
         // Henter alle kortene
-        flashcards = new ArrayList<>(alleFlashcards);
+        aktuelleFlashcards = new ArrayList<>(alleFlashcards);
 
         // Blander flashcards
-        Collections.shuffle(flashcards);
+        Collections.shuffle(aktuelleFlashcards);
 
         // Nulstiller tællerne
         nuværendeFlashcardDerVises = 0;
@@ -109,5 +123,42 @@ public class Træningssession implements Serializable
         næstenKorrekt = 0;
         delvisKorrekt = 0;
         ikkeKorrekt = 0;
+        spilledeKortIDenneRunde = 0;
+
+        // Gennemgår alle flashcards og fjerner gammel korrekt vurdering på dem,
+        // så et nyt spil ikke arver gamle korrekt svar
+        for (Flashcard flashcard : alleFlashcards)
+        {
+            flashcard.setKorrektBesvaretFlashcard(false);
+        }
+    }
+
+    // Metode til at starte en ny spilrunde med flashcards brugeren har svaret forkert på
+    public void startNyRundeMedIkkeKorrekteKort()
+    {
+        // Opretter en arrayliste til at holde på de kort som brugeren har svaret forkert på
+        List<Flashcard> flashcardsNyRunde = new ArrayList<>();
+
+        // Gennemgår alle flashcards og adder forkert besvaret flashcards til arraylisten
+        for (Flashcard flashcard : alleFlashcards)
+        {
+            if (!flashcard.erFlashcardBesvaretKorrekt())
+            {
+                flashcardsNyRunde.add(flashcard);
+            }
+        }
+
+        // næsten korrekt, delvis korrekte og ikke korrekte kort sættes ind som de flashcards der skal spilles videre med
+        aktuelleFlashcards = flashcardsNyRunde;
+
+        // Bland flashcards
+        Collections.shuffle(aktuelleFlashcards);
+
+        // Tællerne nulstilles
+        nuværendeFlashcardDerVises = 0;
+        næstenKorrekt = 0;
+        delvisKorrekt = 0;
+        ikkeKorrekt = 0;
+        spilledeKortIDenneRunde = 0;
     }
 }
