@@ -15,6 +15,9 @@ public class Flashcard implements Serializable
     // boolean til at registerer at et kort er korrekt (true) eller ikke korrekt (false)
     private boolean korrektBesvaretFlashcard = false;
 
+    // boolean til at registerer om et kort er irrelevant (true) eller ikke (false)
+    private boolean erFlashcardIrrelevant = false;
+
     // Konstruktør
     public Flashcard(String svar, String billedeSti)
     {
@@ -34,15 +37,27 @@ public class Flashcard implements Serializable
         return new Image(getClass().getResourceAsStream(billedeSti));
     }
 
-    // Metode til at tjekke om flashcard er besvaret korrekt eller ikke (true/false)
+    // Metode til at tjekke om flashcard er besvaret korrekt (true) eller ikke (false)
     public boolean erFlashcardBesvaretKorrekt()
     {
         return korrektBesvaretFlashcard;
     }
 
-    // Metode til at sætte et Flashcard til true/korrekt eller false/ikke korrekt
+    // Metode til at sætte et flashcard til korrekt (true) eller ikke korrekt (false)
     public void setKorrektBesvaretFlashcard(boolean korrektBesvaret)
     {
         this.korrektBesvaretFlashcard = korrektBesvaret;
+    }
+
+    // Metode til at tjekke om et flashcard er markeret som irrelevant (true) eller ikke (false)
+    public boolean erFlashcardIrrelevant()
+    {
+        return erFlashcardIrrelevant;
+    }
+
+    // Metode til at sætte et flashcard til irrelevant (true) eller ikke (false)
+    public void setIrrelevantFlashcard(boolean irrelevantFlashcard)
+    {
+        this.erFlashcardIrrelevant = irrelevantFlashcard;
     }
 }

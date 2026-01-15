@@ -203,8 +203,12 @@ public class Controller
     @FXML
     void handleButtonIrrelevantFlashcard(MouseEvent event)
     {
+        // Henter det flashcard der vises lige nu og markere det som irrelevant
+        Flashcard flashcard = træningssession.getAktuelleFlashcards().get(træningssession.getNuværendeFlashcardDerVises());
+        flashcard.setIrrelevantFlashcard(true);
+
         // Fjerner det flashcard der vises lige nu fra array-listen med aktuelle flashcards
-        træningssession.getAktuelleFlashcards().remove(træningssession.getNuværendeFlashcardDerVises());
+        træningssession.getAktuelleFlashcards().remove(flashcard);
 
         // Hvis det er sidste flashcard i listen
         if (træningssession.getNuværendeFlashcardDerVises() >= træningssession.getAktuelleFlashcards().size())

@@ -112,11 +112,19 @@ public class Træningssession implements Serializable
     // Metode til at starte træningssessionen forfra
     public void startForfra()
     {
-        // Henter alle kortene
+        // Henter alle flashcards
         aktuelleFlashcards = new ArrayList<>(alleFlashcards);
 
         // Blander flashcards
         Collections.shuffle(aktuelleFlashcards);
+
+        // Gennemgår alle flashcards og fjerner gammel korrekt-vurdering og irrelevant-markering,
+        // så et nyt spil ikke arver gamle vurderinger
+        for (Flashcard flashcard : alleFlashcards)
+        {
+            flashcard.setKorrektBesvaretFlashcard(false);
+            flashcard.setIrrelevantFlashcard(false);
+        }
 
         // Nulstiller tællerne
         nuværendeFlashcardDerVises = 0;
@@ -125,25 +133,19 @@ public class Træningssession implements Serializable
         delvisKorrekt = 0;
         ikkeKorrekt = 0;
         spilledeKortIDenneRunde = 0;
-
-        // Gennemgår alle flashcards og fjerner gammel korrekt vurdering på dem,
-        // så et nyt spil ikke arver gamle korrekt svar
-        for (Flashcard flashcard : alleFlashcards)
-        {
-            flashcard.setKorrektBesvaretFlashcard(false);
-        }
     }
 
     // Metode til at starte en ny spilrunde med flashcards brugeren har svaret forkert på
     public void startNyRundeMedIkkeKorrekteKort()
     {
-        // Opretter en arrayliste til at holde på de kort som brugeren har svaret forkert på
+        // Opretter en array liste til at holde på de kort som brugeren har svaret forkert på
         List<Flashcard> flashcardsNyRunde = new ArrayList<>();
 
-        // Gennemgår alle flashcards og adder forkert besvaret flashcards til arraylisten
+        // Gennemgår alle flashcards og tilføjer forkert besvaret flashcards,
+        // som ikke er markeret som irrelevante, til array listen
         for (Flashcard flashcard : alleFlashcards)
         {
-            if (!flashcard.erFlashcardBesvaretKorrekt())
+            if (!flashcard.erFlashcardBesvaretKorrekt() && !flashcard.erFlashcardIrrelevant())
             {
                 flashcardsNyRunde.add(flashcard);
             }
