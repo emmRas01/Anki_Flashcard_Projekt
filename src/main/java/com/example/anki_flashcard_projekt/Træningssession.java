@@ -41,71 +41,72 @@ public class Træningssession implements Serializable
     // Getter og setter metoder
     public List<Flashcard> getAktuelleFlashcards()
     {
-        return aktuelleFlashcards;
+        return aktuelleFlashcards; // Returnerer listen med de flashcards der spilles med i den aktuelle spilrunde
     }
 
     public List<Flashcard> getAlleFlashcards()
     {
-        return alleFlashcards;
+        return alleFlashcards; // Returnerer listen over alle flashcards fra Anki-filen
     }
 
     public int getSpilledeKortIDenneRunde()
     {
-        return spilledeKortIDenneRunde;
+        return spilledeKortIDenneRunde; // Returnerer hvor mange kort der er spillet i den aktuelle runde
     }
 
     public void setSpilledeKortIDenneRunde(int spilledeKortIDenneRunde)
     {
-        this.spilledeKortIDenneRunde = spilledeKortIDenneRunde;
+        this.spilledeKortIDenneRunde = spilledeKortIDenneRunde; // Sætter hvor mange kort der er spillet i den aktuelle runde
     }
 
     public int getNuværendeFlashcardDerVises()
     {
-        return nuværendeFlashcardDerVises;
+        return nuværendeFlashcardDerVises; // Returnerer index på det flashcard der vises lige nu
     }
 
     public void setNuværendeFlashcardDerVises(int index)
     {
-        this.nuværendeFlashcardDerVises = index;
+        this.nuværendeFlashcardDerVises = index; // Sætter index på det flashcard, der vises lige nu
     }
 
     public int getKorrekt()
     {
-        return korrekt;
+        return korrekt; // Returnerer antal korrekt besvarede flashcards i den aktuelle runde
     }
 
     public void setKorrekt(int korrekt)
     {
-        this.korrekt = korrekt;
+        this.korrekt = korrekt; // Sætter antal korrekt besvarede flashcards i den aktuelle runde
     }
 
     public int getNæstenKorrekt()
     {
-        return næstenKorrekt;
+        return næstenKorrekt; // Returnerer antal næsten korrekt besvarede flashcards i den aktuelle runde
     }
 
     public void setNæstenKorrekt(int næstenKorrekt)
     {
-        this.næstenKorrekt = næstenKorrekt;
+        this.næstenKorrekt = næstenKorrekt; // Sætter antal næsten korrekt besvarede flashcards i den aktuelle runde
     }
 
     public int getDelvisKorrekt()
     {
-        return delvisKorrekt;
+        return delvisKorrekt; // Returnerer antal delvis korrekt besvarede flashcards i den aktuelle runde
     }
 
     public void setDelvisKorrekt(int delvisKorrekt)
     {
-        this.delvisKorrekt = delvisKorrekt;
+        this.delvisKorrekt = delvisKorrekt; // Sætter antal delvis korrekt besvarede flashcards i den aktuelle runde
     }
+
     public int getIkkeKorrekt()
     {
-        return ikkeKorrekt;
+        return ikkeKorrekt; // Returnerer antal ikke korrekt besvarede flashcards i den aktuelle runde
     }
 
     public void setIkkeKorrekt(int ikkeKorrekt)
     {
-        this.ikkeKorrekt = ikkeKorrekt;
+        this.ikkeKorrekt = ikkeKorrekt; // Sætter antal ikke korrekt besvarede flashcards i den aktuelle runde
     }
 
     // Metode til at starte træningssessionen forfra
