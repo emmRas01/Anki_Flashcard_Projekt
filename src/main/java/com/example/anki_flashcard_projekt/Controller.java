@@ -74,18 +74,25 @@ public class Controller
         // Svaret fjernes, så feltet er klar til næste svar
         svarFelt.setText("");
 
-        // Henter index på det flashcard der vises lige nu, og lægger 1 til, for at få næste kort
-        int nuværendeFlashcardDerVises = træningssession.getNuværendeFlashcardDerVises() + 1;
+        erSvaretVist = false;
 
-        // Tjekker om vi er på sidste flashcard, hvis ja -> så tjekkes der om alle svar er korrekte og metoden stoppes
-        if (nuværendeFlashcardDerVises >= træningssession.getAktuelleFlashcards().size())
+        // Henter index på det flashcard der vises lige nu og går videre til næste flashcard
+        int index = træningssession.getNuværendeFlashcardDerVises() + 1;
+
+        // Spring irrelevante kort over
+        while (index < træningssession.getAktuelleFlashcards().size() && træningssession.getAktuelleFlashcards().get(index).erFlashcardIrrelevant())
+        {
+            index = index + 1;
+        }
+
+        // Tjekker om vi er på sidste flashcard, hvis ja -> tjek om spilleren har vundet eller om der skal startes en ny spilrunde
+        if (index >= træningssession.getAktuelleFlashcards().size())
         {
             tjekOmAlleSvarErKorrekte();
             return;
         }
 
-        // Gemmer hvilket flashcard-objekt der vises lige nu
-        træningssession.setNuværendeFlashcardDerVises(nuværendeFlashcardDerVises);
+        træningssession.setNuværendeFlashcardDerVises(index);
 
         // Henter billedet til næste flashcard
         visFlashcard();
@@ -98,15 +105,28 @@ public class Controller
     private void visFlashcard()
     {
         // Tjekker at der findes flashcards, hvis ikke -> metoden stoppes her
-        if(træningssession.getAktuelleFlashcards().isEmpty()) {return;}
+        if (træningssession.getAktuelleFlashcards().isEmpty()) {return;}
 
         // Henter index på det flashcard der vises lige nu
         int index = træningssession.getNuværendeFlashcardDerVises();
+
+        // Skip irrelevante kort
+        while (index < træningssession.getAktuelleFlashcards().size() && træningssession.getAktuelleFlashcards().get(index).erFlashcardIrrelevant())
+        {
+            index = index + 1;
+        }
+
         // Tjekker om vi er på sidste flashcard, hvis ja -> metoden stoppes her
-        if (index >= træningssession.getAktuelleFlashcards().size()) {return;}
+        if (index >= træningssession.getAktuelleFlashcards().size())
+        {
+            tjekOmAlleSvarErKorrekte();
+            return;
+        }
+
+        træningssession.setNuværendeFlashcardDerVises(index);
 
         // Henter og indsætter billedet til flashcard
-        billedeFelt.setImage(træningssession.getAktuelleFlashcards().get(træningssession.getNuværendeFlashcardDerVises()).getBillede());
+        billedeFelt.setImage(træningssession.getAktuelleFlashcards().get(index).getBillede());
     }
 
     // Metode til korrekt-knappen
@@ -114,7 +134,7 @@ public class Controller
     void handleButtonKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        if (!erSvaretVist) {return;}
+        //if (!erSvaretVist) {return;}
 
         // Henter det Flashcard der vises lige nu og markere det som korrekt besvaret
         Flashcard flashcard = træningssession.getAktuelleFlashcards().get(træningssession.getNuværendeFlashcardDerVises());
@@ -136,7 +156,7 @@ public class Controller
     void handleButtonNæstenKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        if (!erSvaretVist) {return;}
+        //if (!erSvaretVist) {return;}
 
         // Tæller 1 op i næsten korrekt
         træningssession.setNæstenKorrekt(træningssession.getNæstenKorrekt() + 1);
@@ -154,7 +174,7 @@ public class Controller
     void handleButtonDelvisKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        if (!erSvaretVist) {return;}
+        //if (!erSvaretVist) {return;}
 
         // Tæller 1 op i delvis korrekt
         træningssession.setDelvisKorrekt(træningssession.getDelvisKorrekt() + 1);
@@ -172,7 +192,7 @@ public class Controller
     void handleButtonIkkeKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        if (!erSvaretVist) {return;}
+        //if (!erSvaretVist) {return;}
 
         // Tæller 1 op i ikke korrekt
         træningssession.setIkkeKorrekt(træningssession.getIkkeKorrekt() + 1);
@@ -207,21 +227,11 @@ public class Controller
         Flashcard flashcard = træningssession.getAktuelleFlashcards().get(træningssession.getNuværendeFlashcardDerVises());
         flashcard.setIrrelevantFlashcard(true);
 
-        // Fjerner det flashcard der vises lige nu fra array-listen med aktuelle flashcards
-        træningssession.getAktuelleFlashcards().remove(flashcard);
+        // Tæl det irrelevante kort som spillet
+        træningssession.setSpilledeKortIDenneRunde(træningssession.getSpilledeKortIDenneRunde() + 1);
 
-        // Hvis det er sidste flashcard i listen
-        if (træningssession.getNuværendeFlashcardDerVises() >= træningssession.getAktuelleFlashcards().size())
-        {
-            // Startes der forfra i array-listen
-            træningssession.setNuværendeFlashcardDerVises(0);
-        }
-
-        // Opdaterer tællerne
-        opdaterTræningsstatus();
-
-        // Henter billedet til næste flashcard
-        visFlashcard();
+        // Gå videre til næste kort
+        næsteKort();
     }
 
     // Metode til pause-knappen
@@ -288,20 +298,12 @@ public class Controller
         // Kører alle flashcards igennem med en for-løkke
         for (Flashcard flashcard : træningssession.getAlleFlashcards())
         {
-            // Hvis et flashcard IKKE er besvaret korrekt -> stoppes metoden ved return. Aka man har ikke vunder endnu.
-            if (!flashcard.erFlashcardBesvaretKorrekt())
+            if (!flashcard.erFlashcardIrrelevant() && !flashcard.erFlashcardBesvaretKorrekt())
             {
-                // Hvis spilleren har spillet alle flashcards igennem i den aktuelle spillerunde,
-                // så startes der en ny spilrunde med ikke korrekte flashcards
-                if (træningssession.getSpilledeKortIDenneRunde() == træningssession.getAktuelleFlashcards().size())
+                if (træningssession.getSpilledeKortIDenneRunde() >= træningssession.getAktuelleFlashcards().size())
                 {
-                    // Starter en ny spilrunde
                     træningssession.startNyRundeMedIkkeKorrekteKort();
-
-                    // Opdaterer tællerne
                     opdaterTræningsstatus();
-
-                    // Henter billedet til næste flashcard
                     visFlashcard();
                 }
                 return;
