@@ -2,6 +2,8 @@ package com.example.anki_flashcard_projekt;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -142,7 +144,7 @@ public class Controller
     void handleButtonKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        //if (!erSvaretVist) {return;}
+        if (!erSvaretVist) {return;}
 
         // Henter det Flashcard der vises lige nu og markere det som korrekt besvaret
         Flashcard flashcard = træningssession.getAktuelleFlashcards().get(træningssession.getNuværendeFlashcardDerVises());
@@ -164,7 +166,7 @@ public class Controller
     void handleButtonNæstenKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        //if (!erSvaretVist) {return;}
+        if (!erSvaretVist) {return;}
 
         // Tæller 1 op i næsten korrekt
         træningssession.setNæstenKorrekt(træningssession.getNæstenKorrekt() + 1);
@@ -182,7 +184,7 @@ public class Controller
     void handleButtonDelvisKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        //if (!erSvaretVist) {return;}
+        if (!erSvaretVist) {return;}
 
         // Tæller 1 op i delvis korrekt
         træningssession.setDelvisKorrekt(træningssession.getDelvisKorrekt() + 1);
@@ -200,7 +202,7 @@ public class Controller
     void handleButtonIkkeKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        //if (!erSvaretVist) {return;}
+        if (!erSvaretVist) {return;}
 
         // Tæller 1 op i ikke korrekt
         træningssession.setIkkeKorrekt(træningssession.getIkkeKorrekt() + 1);
@@ -330,11 +332,15 @@ public class Controller
     // Metode til at vise brugeren at alle flashcards er færdigspillet og korrekte
     public void duHarVundet()
     {
+        // Opretter en Start forfra knap
+        ButtonType startForfra = new ButtonType("Start forfra");
+
         // Laver et pop-up vindue
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Godt klaret!");
         alert.setHeaderText("Tillykke!!!");
         alert.setContentText("Du har gennemført alle flashcards og svaret korrekt!");
+        alert.getButtonTypes().setAll(startForfra);
         alert.showAndWait();
 
         // Når brugeren klikker på OK starter spillet forfra
