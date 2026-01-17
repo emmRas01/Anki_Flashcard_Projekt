@@ -74,24 +74,28 @@ public class Controller
         // Svaret fjernes, så feltet er klar til næste svar
         svarFelt.setText("");
 
+        // Nulstiller svar-status
         erSvaretVist = false;
 
         // Henter index på det flashcard der vises lige nu og går videre til næste flashcard
         int index = træningssession.getNuværendeFlashcardDerVises() + 1;
 
-        // Spring irrelevante kort over
+        // Spring irrelevante kort over ved at øge index indtil der findes et relevant kort eller slutningen af listen nås
+        // Jeg bruger while, da jeg ikke på forhånd ved hvor mange irrelevante kort der skal springes over
+        // Så længe vi stadig er inden for listen og det nuværende flashcard er irrelevant, så gå videre til næste kort
         while (index < træningssession.getAktuelleFlashcards().size() && træningssession.getAktuelleFlashcards().get(index).erFlashcardIrrelevant())
         {
             index = index + 1;
         }
 
-        // Tjekker om vi er på sidste flashcard, hvis ja -> tjek om spilleren har vundet eller om der skal startes en ny spilrunde
+        // Tjekker om vi er på sidste flashcard, hvis ja -> tjekkes der om brugeren har vundet eller skal spilles videre
         if (index >= træningssession.getAktuelleFlashcards().size())
         {
             tjekOmAlleSvarErKorrekte();
             return;
         }
 
+        // Gemmer det flashcard der nu skal vises
         træningssession.setNuværendeFlashcardDerVises(index);
 
         // Henter billedet til næste flashcard
@@ -101,7 +105,7 @@ public class Controller
         opdaterTræningsstatus();
     }
 
-    // Metode der henter og viser billedet til flashcard
+    // Metode der henter og viser billedet til et flashcard
     private void visFlashcard()
     {
         // Tjekker at der findes flashcards, hvis ikke -> metoden stoppes her
@@ -110,19 +114,23 @@ public class Controller
         // Henter index på det flashcard der vises lige nu
         int index = træningssession.getNuværendeFlashcardDerVises();
 
-        // Skip irrelevante kort
-        while (index < træningssession.getAktuelleFlashcards().size() && træningssession.getAktuelleFlashcards().get(index).erFlashcardIrrelevant())
+        // Spring irrelevante kort over ved at øge index indtil der findes et relevant kort eller slutningen af listen nås
+        // Jeg bruger while, da jeg ikke på forhånd ved hvor mange irrelevante kort der skal springes over
+        // Så længe vi stadig er inden for listen og det nuværende flashcard er irrelevant, så gå videre til næste kort
+        while (index < træningssession.getAktuelleFlashcards().size()
+                && træningssession.getAktuelleFlashcards().get(index).erFlashcardIrrelevant())
         {
             index = index + 1;
         }
 
-        // Tjekker om vi er på sidste flashcard, hvis ja -> metoden stoppes her
+        // Tjekker om vi er på sidste flashcard, hvis ja -> tjekkes der om brugeren har vundet eller skal spilles videre
         if (index >= træningssession.getAktuelleFlashcards().size())
         {
             tjekOmAlleSvarErKorrekte();
             return;
         }
 
+        // Gemmer det flashcard der nu skal vises
         træningssession.setNuværendeFlashcardDerVises(index);
 
         // Henter og indsætter billedet til flashcard
@@ -205,7 +213,7 @@ public class Controller
         næsteKort();
     }
 
-    // Metode der opdaterer tallene i træningsstatussen
+    // Metode der opdaterer tællerne i træningsstatussen
     private void opdaterTræningsstatus()
     {
         labelAntalKort.setText(String.valueOf(træningssession.getAktuelleFlashcards().size()));
@@ -227,7 +235,7 @@ public class Controller
         Flashcard flashcard = træningssession.getAktuelleFlashcards().get(træningssession.getNuværendeFlashcardDerVises());
         flashcard.setIrrelevantFlashcard(true);
 
-        // Tæl det irrelevante kort som spillet
+        // Tæl det irrelevante kort som spillet -> sikre at spilrunden afsluttes korrekt nede i tjekOmAlleSvarErKorrekte()
         træningssession.setSpilledeKortIDenneRunde(træningssession.getSpilledeKortIDenneRunde() + 1);
 
         // Gå videre til næste kort
@@ -298,19 +306,23 @@ public class Controller
         // Kører alle flashcards igennem med en for-løkke
         for (Flashcard flashcard : træningssession.getAlleFlashcards())
         {
+            // Tjekker om der findes relevante flashcards, der er besvaret forkert, hvis ja -> spilles der videre
             if (!flashcard.erFlashcardIrrelevant() && !flashcard.erFlashcardBesvaretKorrekt())
             {
+                // Tjekker om vi er på sidste flashcard, hvis ja -> startes en ny spilrunde 
                 if (træningssession.getSpilledeKortIDenneRunde() >= træningssession.getAktuelleFlashcards().size())
                 {
-                    træningssession.startNyRundeMedIkkeKorrekteKort();
-                    opdaterTræningsstatus();
-                    visFlashcard();
+                    træningssession.startNyRundeMedIkkeKorrekteKort(); // Starter en ny runde med forkert besvaret kort
+                    opdaterTræningsstatus(); // Opdaterer tællerne
+                    visFlashcard(); // Henter billedet til næste flashcard
                 }
-                return;
+                return; // Stopper metoden, da der findes mindst 1 relevant flashcard der ikke er korrekt besvaret +
+                        // spilrunden er stadig igang, så den indre if-sætning køres ikke -> spilleren har ikke vundet
+                        // endnu og skal bare spille videre
             }
         }
 
-        // Hvis for-løkken gennemføres uden return, så ved vi at alle flashcards er korrekte
+        // Hvis for-løkken gennemføres uden at stoppe ved return, så betyder det at alle flashcards er korrekte
         // og det betyder at spilleren har vundet
         duHarVundet();
     }
