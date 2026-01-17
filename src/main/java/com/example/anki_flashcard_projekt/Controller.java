@@ -2,7 +2,6 @@ package com.example.anki_flashcard_projekt;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
@@ -242,13 +241,6 @@ public class Controller
 
         // Gå videre til næste kort
         næsteKort();
-    }
-
-    // Metode til pause-knappen
-    @FXML
-    void handleButtonPause(MouseEvent event)
-    {
-
     }
 
     // Metode til start-forfra-knappen
