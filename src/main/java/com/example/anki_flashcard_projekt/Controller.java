@@ -105,7 +105,6 @@ public class Controller
         {
             venteTimer.stop(); // Stoppes vente timeren, så den ikke tæller når et flashcard vises
         }
-
         // Skjuler 'Vente'-teksten
         labelVenteTekst.setVisible(false);
         // Billedet hentes
@@ -118,17 +117,20 @@ public class Controller
     // Metode der tjekker 1 gang i sekundet om tidslåste flashcard er klar til visning
     private void tjekOmFlashcardErKlarTilVisning()
     {
-        // Hvis der findes en gammel timer, så stoppes den
+        // Hvis der findes en gammel vente timer, så stoppes den
         if (venteTimer != null)
         {
             venteTimer.stop();
         }
 
+        // Opretter en timer der kører hvert sekund og tjekker om der er et flashcard klar til visning
         venteTimer = new Timeline(
                 new KeyFrame(Duration.seconds(1), e ->
                 {
+                    // Tjekker om der findes et flashcard klar til visning. Enten returneres der et flashcard eller ikke (null)
                     Flashcard flashcardDerErKlar = træningssession.findDetNæsteFlashcardDerErKlarTilVisning();
 
+                    // Tjekker om der findes et flashcard, hvis ja -> stoppes vente timeren og flashcardet vises
                     if (flashcardDerErKlar != null)
                     {
                         venteTimer.stop();
@@ -136,7 +138,9 @@ public class Controller
                     }
                 })
         );
+        // Timeren skal køre på ubestemt tid
         venteTimer.setCycleCount(Timeline.INDEFINITE);
+        // Starter timeren, så der tjekkes hvert sekund
         venteTimer.play();
     }
 
@@ -146,8 +150,7 @@ public class Controller
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
         // eller hvis ingen flashcards er klar lige nu pga. tidslås, så kan svaret ikke vurderes -> metoden stoppes her
-        //if (!erSvaretVist || aktueltFlashcard == null) {return;}
-        if (aktueltFlashcard == null) {return;} // Skal slettes efter tjek!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (!erSvaretVist || aktueltFlashcard == null) {return;}
 
         // Markerer flashcard der vises lige nu som korrekt besvaret
         aktueltFlashcard.setKorrektBesvaretFlashcard(true);
@@ -181,8 +184,7 @@ public class Controller
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
         // eller hvis ingen flashcards er klar lige nu pga. tidslås, så kan svaret ikke vurderes -> metoden stoppes her
-        //if (!erSvaretVist || aktueltFlashcard == null) {return;}
-        if (aktueltFlashcard == null) {return;} // Skal slettes efter tjek!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (!erSvaretVist || aktueltFlashcard == null) {return;}
 
         // Markerer flashcard der vises lige nu som næsten korrekt besvaret
         aktueltFlashcard.setKorrektBesvaretFlashcard(false);
@@ -209,8 +211,7 @@ public class Controller
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
         // eller hvis ingen flashcards er klar lige nu pga. tidslås, så kan svaret ikke vurderes -> metoden stoppes her
-        //if (!erSvaretVist || aktueltFlashcard == null) {return;}
-        if (aktueltFlashcard == null) {return;} // Skal slettes efter tjek!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (!erSvaretVist || aktueltFlashcard == null) {return;}
 
         // Markerer flashcard der vises lige nu som delvis korrekt besvaret
         aktueltFlashcard.setKorrektBesvaretFlashcard(false);
@@ -237,8 +238,7 @@ public class Controller
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
         // eller hvis ingen flashcards er klar lige nu pga. tidslås, så kan svaret ikke vurderes -> metoden stoppes her
-        //if (!erSvaretVist || aktueltFlashcard == null) {return;}
-        if (aktueltFlashcard == null) {return;} // Skal slettes efter tjek!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (!erSvaretVist || aktueltFlashcard == null) {return;}
 
         // Markerer flashcard der vises lige nu som ikke korrekt besvaret
         aktueltFlashcard.setKorrektBesvaretFlashcard(false);
@@ -269,6 +269,8 @@ public class Controller
         int ikkeKorrekt = 0;
         int ikkeSpilledeFlashcards = 0;
 
+        // for-løkke der kører alle flashcards igennem og
+        // tæller 1 op hvis de er vurderet korrekt, næsten-, delvis- eller ikke-korrekt
         for (Flashcard flashcard : træningssession.getAktuelleFlashcards())
         {
             if (flashcard.erFlashcardBesvaretKorrekt())
@@ -294,6 +296,7 @@ public class Controller
             }
         }
 
+        // Labels opdateres med de nye tal
         labelAntalKorrekte.setText(String.valueOf(korrekt));
         labelAntalNæstenKorrekte.setText(String.valueOf(næstenKorrekt));
         labelAntalDelvisKorrekte.setText(String.valueOf(delvisKorrekt));
@@ -417,7 +420,7 @@ public class Controller
         alert.getButtonTypes().setAll(startForfra);
         alert.showAndWait();
 
-        // Når brugeren klikker på OK starter spillet forfra
+        // Når brugeren klikker på Start forfra startes spillet forfra
         træningssession.startForfra();
         svarFelt.setText("");
         erSvaretVist = false;

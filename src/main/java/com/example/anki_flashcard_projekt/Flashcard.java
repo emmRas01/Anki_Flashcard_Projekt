@@ -12,7 +12,7 @@ public class Flashcard implements Serializable
     // Definition af attributterne
     private String billedeSti;            // Stien til billedet
     private String svar;                  // Svaret: Titlen på kunstværket, kunstnerens navn, årstal
-    private LocalDateTime næsteVisning;   // Holder styr på hvornår Flashcardet må vises igen efter forkert besvarrelse
+    private LocalDateTime næsteVisning;   // Holder styr på hvornår Flashcardet må vises igen efter forkert besvarelse
 
     // boolean til at registerer at et kort er vurderet som korrekt (true) eller ikke (false)
     private boolean korrektBesvaretFlashcard = false;

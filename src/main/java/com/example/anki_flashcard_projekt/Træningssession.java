@@ -24,15 +24,10 @@ public class Træningssession implements Serializable
         this.alleFlashcards = new ArrayList<>(flashcards);
     }
 
-    // Getter og setter metoder
+    // Metode der returnerer listen med de flashcards der spilles med i den aktuelle spilrunde
     public List<Flashcard> getAktuelleFlashcards()
     {
-        return aktuelleFlashcards; // Returnerer listen med de flashcards der spilles med i den aktuelle spilrunde
-    }
-
-    public List<Flashcard> getAlleFlashcards()
-    {
-        return alleFlashcards; // Returnerer listen over alle flashcards fra Anki-filen
+        return aktuelleFlashcards;
     }
 
     // Metode til at sætte et flashcard som irrelevant og fjerne det
@@ -78,7 +73,7 @@ public class Træningssession implements Serializable
         // Blander alle flashcards i Arraylisten, så de kommer tilfældigt
         Collections.shuffle(kortDerErKlarTilVisningBlandet);
 
-        // Returnere et tilfældigt flashcard der opfylder de 3 krav
+        // Returnere det første kort i den blandede array-liste der opfylder de 3 krav
         return kortDerErKlarTilVisningBlandet.get(0);
     }
 
