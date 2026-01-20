@@ -1,5 +1,7 @@
 package com.example.anki_flashcard_projekt;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -7,6 +9,8 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import java.io.IOException;
+import javafx.util.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Controller
@@ -33,6 +37,9 @@ public class Controller
     private Label labelAntalKort;
 
     @FXML
+    private Label labelVenteTekst;
+
+    @FXML
     private Label labelIkkeSpillet;
 
     // Indeholder den aktuelle træningssession med flashcards og træningsstatus
@@ -40,6 +47,12 @@ public class Controller
 
     // Bruges til at sikre at brugeren har klikket på "Vis Svar" inden man kan vurdere svaret
     private boolean erSvaretVist = false;
+
+    // Holder styr på hvilket flashcard der vises lige nu
+    private Flashcard aktueltFlashcard;
+
+    // JavaFX-timer der bruges til automatisk at tjekke, hvornår næste flashcard er klar til visning i forhold til tidslås
+    private Timeline venteTimer;
 
     public void initialize()
     {
@@ -56,6 +69,9 @@ public class Controller
             træningssession = new Træningssession(new ArrayList<>(AnkiImport.importerAnkiFil()));
         }
 
+        // 'Vente'-teksten skjules
+        labelVenteTekst.setVisible(false);
+
         // Opdatere tællerne
         opdaterTræningsstatus();
 
@@ -69,73 +85,59 @@ public class Controller
         Serialization.gemTræningssession(træningssession);
     }
 
-    // Metode der skifter til næste kort
-    private void næsteKort()
-    {
-        // Svaret fjernes, så feltet er klar til næste svar
-        svarFelt.setText("");
-
-        // Nulstiller svar-status
-        erSvaretVist = false;
-
-        // Henter index på det flashcard der vises lige nu og går videre til næste flashcard
-        int index = træningssession.getNuværendeFlashcardDerVises() + 1;
-
-        // Spring irrelevante kort over ved at øge index indtil der findes et relevant kort eller slutningen af listen nås
-        // Jeg bruger while, da jeg ikke på forhånd ved hvor mange irrelevante kort der skal springes over
-        // Så længe vi stadig er inden for listen og det nuværende flashcard er irrelevant, så gå videre til næste kort
-        while (index < træningssession.getAktuelleFlashcards().size() && træningssession.getAktuelleFlashcards().get(index).erFlashcardIrrelevant())
-        {
-            index = index + 1;
-        }
-
-        // Tjekker om vi er på sidste flashcard, hvis ja -> tjekkes der om brugeren har vundet eller skal spilles videre
-        if (index >= træningssession.getAktuelleFlashcards().size())
-        {
-            tjekOmAlleSvarErKorrekte();
-            return;
-        }
-
-        // Gemmer det flashcard der nu skal vises
-        træningssession.setNuværendeFlashcardDerVises(index);
-
-        // Henter billedet til næste flashcard
-        visFlashcard();
-
-        // Opdaterer tællerne
-        opdaterTræningsstatus();
-    }
-
     // Metode der henter og viser billedet til et flashcard
     private void visFlashcard()
     {
-        // Tjekker at der findes flashcards, hvis ikke -> metoden stoppes her
-        if (træningssession.getAktuelleFlashcards().isEmpty()) {return;}
+        // Henter næste flashcard der er klar til at blive vist
+        aktueltFlashcard = træningssession.findDetNæsteFlashcardDerErKlarTilVisning();
 
-        // Henter index på det flashcard der vises lige nu
-        int index = træningssession.getNuværendeFlashcardDerVises();
-
-        // Spring irrelevante kort over ved at øge index indtil der findes et relevant kort eller slutningen af listen nås
-        // Jeg bruger while, da jeg ikke på forhånd ved hvor mange irrelevante kort der skal springes over
-        // Så længe vi stadig er inden for listen og det nuværende flashcard er irrelevant, så gå videre til næste kort
-        while (index < træningssession.getAktuelleFlashcards().size()
-                && træningssession.getAktuelleFlashcards().get(index).erFlashcardIrrelevant())
+        // Hvis ingen flashcards er klar lige nu pga. tidslås, så får brugeren besked på at vente
+        if (aktueltFlashcard == null)
         {
-            index = index + 1;
-        }
-
-        // Tjekker om vi er på sidste flashcard, hvis ja -> tjekkes der om brugeren har vundet eller skal spilles videre
-        if (index >= træningssession.getAktuelleFlashcards().size())
-        {
-            tjekOmAlleSvarErKorrekte();
+            labelVenteTekst.setText("Ingen flashcards er klar til visning lige nu. \n" + "Vent lidt med at spille videre - næste kort vises automatisk.");
+            labelVenteTekst.setVisible(true); // Viser 'Vente'-teksten
+            billedeFelt.setImage(null);
+            tjekOmFlashcardErKlarTilVisning(); // Starter vente timeren, så brugeren automatisk får vist næste flashcard
             return;
         }
+        // Hvis et flashcard er klar til visning
+        if (venteTimer != null)
+        {
+            venteTimer.stop(); // Stoppes vente timeren, så den ikke tæller når et flashcard vises
+        }
 
-        // Gemmer det flashcard der nu skal vises
-        træningssession.setNuværendeFlashcardDerVises(index);
+        // Skjuler 'Vente'-teksten
+        labelVenteTekst.setVisible(false);
+        // Billedet hentes
+        billedeFelt.setImage(aktueltFlashcard.getBillede());
+        // Og svaret fjernes fra det tidligere flashcard
+        svarFelt.setText("");
+        erSvaretVist = false;
+    }
 
-        // Henter og indsætter billedet til flashcard
-        billedeFelt.setImage(træningssession.getAktuelleFlashcards().get(index).getBillede());
+    // Metode der tjekker 1 gang i sekundet om tidslåste flashcard er klar til visning
+    private void tjekOmFlashcardErKlarTilVisning()
+    {
+        // Hvis der findes en gammel timer, så stoppes den
+        if (venteTimer != null)
+        {
+            venteTimer.stop();
+        }
+
+        venteTimer = new Timeline(
+                new KeyFrame(Duration.seconds(1), e ->
+                {
+                    Flashcard flashcardDerErKlar = træningssession.findDetNæsteFlashcardDerErKlarTilVisning();
+
+                    if (flashcardDerErKlar != null)
+                    {
+                        venteTimer.stop();
+                        visFlashcard();
+                    }
+                })
+        );
+        venteTimer.setCycleCount(Timeline.INDEFINITE);
+        venteTimer.play();
     }
 
     // Metode til korrekt-knappen
@@ -143,21 +145,34 @@ public class Controller
     void handleButtonKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        if (!erSvaretVist) {return;}
+        // eller hvis ingen flashcards er klar lige nu pga. tidslås, så kan svaret ikke vurderes -> metoden stoppes her
+        //if (!erSvaretVist || aktueltFlashcard == null) {return;}
+        if (aktueltFlashcard == null) {return;} // Skal slettes efter tjek!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        // Henter det Flashcard der vises lige nu og markere det som korrekt besvaret
-        Flashcard flashcard = træningssession.getAktuelleFlashcards().get(træningssession.getNuværendeFlashcardDerVises());
-        flashcard.setKorrektBesvaretFlashcard(true);
+        // Markerer flashcard der vises lige nu som korrekt besvaret
+        aktueltFlashcard.setKorrektBesvaretFlashcard(true);
+        aktueltFlashcard.setNæstenKorrektBesvaretFlashcard(false);
+        aktueltFlashcard.setDelvisKorrektBesvaretFlashcard(false);
+        aktueltFlashcard.setIkkeKorrektBesvaretFlashcard(false);
 
-        // Tæller 1 korrekt op
-        træningssession.setKorrekt(træningssession.getKorrekt() + 1);
+        // Markerer flashcard der vises lige nu som besvaret/vurderet
+        aktueltFlashcard.setBesvaretFlashcard(true);
 
-        // Tæller 1 op i spillede kort i denne runde, så der kan holdes styr på hvornår en
-        // ny runde skal startes med forkert besvaret kort eller hvornår brugeren har vundet med 100% korrekte svar
-        træningssession.setSpilledeKortIDenneRunde(træningssession.getSpilledeKortIDenneRunde() + 1);
+        // Dette flashcard kan først vises igen tidligst om 4 dage
+        aktueltFlashcard.setNæsteVisning(LocalDateTime.now().plusDays(4));
 
-        // Hopper videre til næste flashcard
-        næsteKort();
+        // Tjekker om alle flashcards er besvaret korrekt, hvis ja -> brugeren har vundet og metoden stoppes
+        if (træningssession.tjekOmAlleSvarErKorrekte())
+        {
+            duHarVundet();
+            return;
+        }
+
+        // Henter billedet til næste flashcard
+        visFlashcard();
+
+        // Opdatere tællerne
+        opdaterTræningsstatus();
     }
 
     // Metode til næsten-Korrekt-knappen
@@ -165,17 +180,27 @@ public class Controller
     void handleButtonNæstenKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        if (!erSvaretVist) {return;}
+        // eller hvis ingen flashcards er klar lige nu pga. tidslås, så kan svaret ikke vurderes -> metoden stoppes her
+        //if (!erSvaretVist || aktueltFlashcard == null) {return;}
+        if (aktueltFlashcard == null) {return;} // Skal slettes efter tjek!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        // Tæller 1 op i næsten korrekt
-        træningssession.setNæstenKorrekt(træningssession.getNæstenKorrekt() + 1);
+        // Markerer flashcard der vises lige nu som næsten korrekt besvaret
+        aktueltFlashcard.setKorrektBesvaretFlashcard(false);
+        aktueltFlashcard.setNæstenKorrektBesvaretFlashcard(true);
+        aktueltFlashcard.setDelvisKorrektBesvaretFlashcard(false);
+        aktueltFlashcard.setIkkeKorrektBesvaretFlashcard(false);
 
-        // Tæller 1 op i spillede kort i denne runde, så der kan holdes styr på hvornår en
-        // ny runde skal startes med forkert besvaret kort eller hvornår brugeren har vundet med 100% korrekte svar
-        træningssession.setSpilledeKortIDenneRunde(træningssession.getSpilledeKortIDenneRunde() + 1);
+        // Markerer flashcard der vises lige nu som besvaret/vurderet
+        aktueltFlashcard.setBesvaretFlashcard(true);
 
-        // Hopper videre til næste flashcard
-        næsteKort();
+        // Dette flashcard kan først vises igen tidligst om 10 min
+        aktueltFlashcard.setNæsteVisning(LocalDateTime.now().plusMinutes(10));
+
+        // Henter billedet til næste flashcard
+        visFlashcard();
+
+        // Opdatere tællerne
+        opdaterTræningsstatus();
     }
 
     // Metode til delvis-korrekt-knappen
@@ -183,17 +208,27 @@ public class Controller
     void handleButtonDelvisKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        if (!erSvaretVist) {return;}
+        // eller hvis ingen flashcards er klar lige nu pga. tidslås, så kan svaret ikke vurderes -> metoden stoppes her
+        //if (!erSvaretVist || aktueltFlashcard == null) {return;}
+        if (aktueltFlashcard == null) {return;} // Skal slettes efter tjek!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        // Tæller 1 op i delvis korrekt
-        træningssession.setDelvisKorrekt(træningssession.getDelvisKorrekt() + 1);
+        // Markerer flashcard der vises lige nu som delvis korrekt besvaret
+        aktueltFlashcard.setKorrektBesvaretFlashcard(false);
+        aktueltFlashcard.setNæstenKorrektBesvaretFlashcard(false);
+        aktueltFlashcard.setDelvisKorrektBesvaretFlashcard(true);
+        aktueltFlashcard.setIkkeKorrektBesvaretFlashcard(false);
 
-        // Tæller 1 op i spillede kort i denne runde, så der kan holdes styr på hvornår en
-        // ny runde skal startes med forkert besvaret kort eller hvornår brugeren har vundet med 100% korrekte svar
-        træningssession.setSpilledeKortIDenneRunde(træningssession.getSpilledeKortIDenneRunde() + 1);
+        // Markerer flashcard der vises lige nu som besvaret/vurderet
+        aktueltFlashcard.setBesvaretFlashcard(true);
 
-        // Hopper videre til næste flashcard
-        næsteKort();
+        // Dette flashcard kan først vises igen tidligst om 5 min
+        aktueltFlashcard.setNæsteVisning(LocalDateTime.now().plusMinutes(5));
+
+        // Henter billedet til næste flashcard
+        visFlashcard();
+
+        // Opdatere tællerne
+        opdaterTræningsstatus();
     }
 
     // Metode til ikke-korrekt-knappen
@@ -201,57 +236,120 @@ public class Controller
     void handleButtonIkkeKorrekt(MouseEvent event)
     {
         // Tjekker om brugeren har klikket vis svar, hvis ikke, så kan svaret ikke vurderes -> metoden stoppes her
-        if (!erSvaretVist) {return;}
+        // eller hvis ingen flashcards er klar lige nu pga. tidslås, så kan svaret ikke vurderes -> metoden stoppes her
+        //if (!erSvaretVist || aktueltFlashcard == null) {return;}
+        if (aktueltFlashcard == null) {return;} // Skal slettes efter tjek!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        // Tæller 1 op i ikke korrekt
-        træningssession.setIkkeKorrekt(træningssession.getIkkeKorrekt() + 1);
+        // Markerer flashcard der vises lige nu som ikke korrekt besvaret
+        aktueltFlashcard.setKorrektBesvaretFlashcard(false);
+        aktueltFlashcard.setNæstenKorrektBesvaretFlashcard(false);
+        aktueltFlashcard.setDelvisKorrektBesvaretFlashcard(false);
+        aktueltFlashcard.setIkkeKorrektBesvaretFlashcard(true);
 
-        // Tæller 1 op i spillede kort i denne runde, så der kan holdes styr på hvornår en
-        // ny runde skal startes med forkert besvaret kort eller hvornår brugeren har vundet med 100% korrekte svar
-        træningssession.setSpilledeKortIDenneRunde(træningssession.getSpilledeKortIDenneRunde() + 1);
+        // Markerer flashcard der vises lige nu som besvaret/vurderet
+        aktueltFlashcard.setBesvaretFlashcard(true);
 
-        // Hopper videre til næste flashcard
-        næsteKort();
+        // Dette flashcard kan først vises igen tidligst om 1 min
+        aktueltFlashcard.setNæsteVisning(LocalDateTime.now().plusMinutes(1));
+
+        // Henter billedet til næste flashcard
+        visFlashcard();
+
+        // Opdatere tællerne
+        opdaterTræningsstatus();
     }
 
     // Metode der opdaterer tællerne i træningsstatussen
     private void opdaterTræningsstatus()
     {
-        labelAntalKort.setText(String.valueOf(træningssession.getAktuelleFlashcards().size()));
-        labelAntalKorrekte.setText(String.valueOf(træningssession.getKorrekt()));
-        labelAntalNæstenKorrekte.setText(String.valueOf(træningssession.getNæstenKorrekt()));
-        labelAntalDelvisKorrekte.setText(String.valueOf(træningssession.getDelvisKorrekt()));
-        labelAntalIkkeKorrekte.setText(String.valueOf(træningssession.getIkkeKorrekt()));
+        // Tæller brugerens vurdering af svar
+        int korrekt = 0;
+        int næstenKorrekt = 0;
+        int delvisKorrekt = 0;
+        int ikkeKorrekt = 0;
+        int ikkeSpilledeFlashcards = 0;
 
-        // Finder antal på de flashcards der ikke er spillet endnu i den aktuelle spilrunde
-        int ikkeSpilledeFlashcards = træningssession.getAktuelleFlashcards().size() - træningssession.getSpilledeKortIDenneRunde();
+        for (Flashcard flashcard : træningssession.getAktuelleFlashcards())
+        {
+            if (flashcard.erFlashcardBesvaretKorrekt())
+            {
+                korrekt = korrekt + 1;
+            }
+            else if (flashcard.erFlashcardBesvaretNæstenKorrekt())
+            {
+                næstenKorrekt = næstenKorrekt + 1;
+            }
+            else if (flashcard.erFlashcardBesvaretDelvisKorrekt())
+            {
+                delvisKorrekt = delvisKorrekt + 1;
+            }
+            else if (flashcard.erFlashcardBesvaretIkkeKorrekt())
+            {
+                ikkeKorrekt = ikkeKorrekt + 1;
+            }
+
+            if (!flashcard.erFlashcardBesvaret())
+            {
+                ikkeSpilledeFlashcards = ikkeSpilledeFlashcards + 1;
+            }
+        }
+
+        labelAntalKorrekte.setText(String.valueOf(korrekt));
+        labelAntalNæstenKorrekte.setText(String.valueOf(næstenKorrekt));
+        labelAntalDelvisKorrekte.setText(String.valueOf(delvisKorrekt));
+        labelAntalIkkeKorrekte.setText(String.valueOf(ikkeKorrekt));
         labelIkkeSpillet.setText(String.valueOf(ikkeSpilledeFlashcards));
+        labelAntalKort.setText(String.valueOf(træningssession.getAktuelleFlashcards().size()));
     }
 
     // Metode til irrelevant-flashcard knap
     @FXML
     void handleButtonIrrelevantFlashcard(MouseEvent event)
     {
-        // Henter det flashcard der vises lige nu og markere det som irrelevant
-        Flashcard flashcard = træningssession.getAktuelleFlashcards().get(træningssession.getNuværendeFlashcardDerVises());
-        flashcard.setIrrelevantFlashcard(true);
+        // Tjekker at der findes et flashcard der vises lige nu, hvis ja -> markeres det som irrelevant og fjernes
+        if (aktueltFlashcard != null)
+        {
+            // Markerer det som irrelevant og fjerner det fra listen med flashcards i den aktuelle træning
+            træningssession.fjernIrrelevantFlashcard(aktueltFlashcard);
 
-        // Tæl det irrelevante kort som spillet -> sikre at spilrunden afsluttes korrekt nede i tjekOmAlleSvarErKorrekte()
-        træningssession.setSpilledeKortIDenneRunde(træningssession.getSpilledeKortIDenneRunde() + 1);
+            // Fortæller programmet at der ikke længere vises et flashcard
+            aktueltFlashcard = null;
+        }
 
-        // Gå videre til næste kort
-        næsteKort();
+        // Opdatere tællerne
+        opdaterTræningsstatus();
+
+        // Tjekker om brugeren har vundet, hvis tjekOmAlleSvarErKorrekte() returnere et boolean, true -> så har brugeren vundet
+        // sikre at spillet afsluttes når der klikkes irrelevant på sidste flashcard
+        if (træningssession.tjekOmAlleSvarErKorrekte())
+        {
+            duHarVundet(); // Kalder pop-up vinduet med vinder-beskeden
+            return; // Metoden stoppes her
+        }
+
+        // Henter billedet til næste flashcard
+        visFlashcard();
     }
 
     // Metode til start-forfra-knappen
     @FXML
     void handleButtonStartForfra(MouseEvent event)
     {
+        // Hvis der findes en vente-timer, så stoppes den
+        if (venteTimer != null)
+        {
+            venteTimer.stop();
+        }
+
         // Kalder startForfra metoden
         træningssession.startForfra();
 
         // Fjerner svaret fra det tidligere flashcard
         svarFelt.setText("");
+        erSvaretVist = false;
+
+        // Skjuler 'vente'-teksten
+        labelVenteTekst.setVisible(false);
 
         // Opdaterer tællerne
         opdaterTræningsstatus();
@@ -282,48 +380,32 @@ public class Controller
     @FXML
     void handleButtonVisSvar(MouseEvent event)
     {
-        // Tjekker at der findes flashcards
-        if(!træningssession.getAktuelleFlashcards().isEmpty())
+        // Tjekker at der findes et flashcard der vises lige nu
+        if (aktueltFlashcard != null)
         {
+            // Skjuler 'Vente'-teksten når der vises et kort
+            labelVenteTekst.setVisible(false);
             // Indsætter svaret på det flashcard der vises lige nu
-            svarFelt.setText(træningssession.getAktuelleFlashcards().get(træningssession.getNuværendeFlashcardDerVises()).getSvar());
-
+            svarFelt.setText(aktueltFlashcard.getSvar());
             // Registerer at svaret nu er blevet vist
             erSvaretVist = true;
         }
-    }
-
-    // Metode til at tjekke om brugeren har vundet med 100% korrekte svar eller
-    // om brugeren skal spille videre med forkert besvaret flashcards
-    public void tjekOmAlleSvarErKorrekte()
-    {
-        // Kører alle flashcards igennem med en for-løkke
-        for (Flashcard flashcard : træningssession.getAlleFlashcards())
+        else // Hvis ikke der findes et flashcard der vises lige nu, så får brugeren besked
         {
-            // Tjekker om der findes relevante flashcards, der er besvaret forkert, hvis ja -> spilles der videre
-            if (!flashcard.erFlashcardIrrelevant() && !flashcard.erFlashcardBesvaretKorrekt())
-            {
-                // Tjekker om vi er på sidste flashcard, hvis ja -> startes en ny spilrunde 
-                if (træningssession.getSpilledeKortIDenneRunde() >= træningssession.getAktuelleFlashcards().size())
-                {
-                    træningssession.startNyRundeMedIkkeKorrekteKort(); // Starter en ny runde med forkert besvaret kort
-                    opdaterTræningsstatus(); // Opdaterer tællerne
-                    visFlashcard(); // Henter billedet til næste flashcard
-                }
-                return; // Stopper metoden, da der findes mindst 1 relevant flashcard der ikke er korrekt besvaret +
-                        // spilrunden er stadig igang, så den indre if-sætning køres ikke -> spilleren har ikke vundet
-                        // endnu og skal bare spille videre
-            }
+            labelVenteTekst.setText("Ingen flashcards er klar til visning lige nu. \n" + "Vent lidt med at spille videre - næste kort vises automatisk.");
+            labelVenteTekst.setVisible(true); // Viser 'Vente'-teksten
         }
-
-        // Hvis for-løkken gennemføres uden at stoppe ved return, så betyder det at alle flashcards er korrekte
-        // og det betyder at spilleren har vundet
-        duHarVundet();
     }
 
     // Metode til at vise brugeren at alle flashcards er færdigspillet og korrekte
     public void duHarVundet()
     {
+        // Hvis der findes en vente-timer, så stoppes den
+        if (venteTimer != null)
+        {
+            venteTimer.stop();
+        }
+
         // Opretter en Start forfra knap
         ButtonType startForfra = new ButtonType("Start forfra");
 
@@ -339,6 +421,7 @@ public class Controller
         træningssession.startForfra();
         svarFelt.setText("");
         erSvaretVist = false;
+        labelVenteTekst.setVisible(false);
         opdaterTræningsstatus();
         visFlashcard();
     }

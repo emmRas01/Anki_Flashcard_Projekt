@@ -111,7 +111,12 @@
       </Button>
       <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.halignment="CENTER" GridPane.rowSpan="7" GridPane.valignment="CENTER">
          <children>
-            <ImageView fx:id="billedeFelt" fitHeight="284.0" fitWidth="511.0" pickOnBounds="true" preserveRatio="true" />
+            <StackPane>
+               <children>
+                  <ImageView fx:id="billedeFelt" fitHeight="284.0" fitWidth="511.0" pickOnBounds="true" preserveRatio="true" />
+                  <Label fx:id="labelVenteTekst" textAlignment="CENTER" wrapText="true" StackPane.alignment="CENTER" />
+               </children>
+            </StackPane>
          </children>
       </StackPane>
       <TextArea editable="false" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="9" />
